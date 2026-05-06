@@ -1,0 +1,222 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=1024, height=600, initial-scale=1.0, maximum-scale=1.0">
+<title>车机浏览器</title>
+<style>
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body {
+    background: #0d1117;
+    color: #e6edf3;
+    font-family: -apple-system, "PingFang SC", "Microsoft YaHei", sans-serif;
+    height: 600px;
+    overflow: hidden;
+    user-select: none;
+    -webkit-user-select: none;
+}
+
+.container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    height: 100%;
+    padding: 20px;
+}
+
+/* 时钟 */
+.clock {
+    font-size: 64px;
+    font-weight: 200;
+    color: #e6edf3;
+    letter-spacing: 4px;
+    margin-bottom: 4px;
+}
+.date {
+    font-size: 16px;
+    color: #8b949e;
+    margin-bottom: 30px;
+}
+
+/* 搜索框 */
+.search-box {
+    width: 600px;
+    height: 48px;
+    display: flex;
+    align-items: center;
+    background: #161b22;
+    border: 1px solid #30363d;
+    border-radius: 24px;
+    padding: 0 20px;
+    margin-bottom: 40px;
+    transition: border-color 0.2s;
+}
+.search-box:focus-within {
+    border-color: #4CAF50;
+}
+.search-box input {
+    flex: 1;
+    background: none;
+    border: none;
+    outline: none;
+    color: #e6edf3;
+    font-size: 16px;
+}
+.search-box input::placeholder {
+    color: #484f58;
+}
+.search-btn {
+    background: #4CAF50;
+    color: #fff;
+    border: none;
+    border-radius: 16px;
+    padding: 6px 16px;
+    font-size: 14px;
+    cursor: pointer;
+}
+
+/* 快捷导航 */
+.shortcuts {
+    display: grid;
+    grid-template-columns: repeat(6, 1fr);
+    gap: 20px;
+    max-width: 720px;
+}
+.shortcut {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 8px;
+    text-decoration: none;
+    cursor: pointer;
+}
+.shortcut-icon {
+    width: 56px;
+    height: 56px;
+    border-radius: 16px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 24px;
+    font-weight: bold;
+    color: #fff;
+    transition: transform 0.15s;
+}
+.shortcut-icon:active {
+    transform: scale(0.92);
+}
+.shortcut-name {
+    font-size: 12px;
+    color: #8b949e;
+}
+</style>
+</head>
+<body>
+<div class="container">
+    <div class="clock" id="clock">00:00</div>
+    <div class="date" id="date"></div>
+
+    <div class="search-box">
+        <input type="text" id="searchInput" placeholder="搜索或输入网址" 
+               autocomplete="off" autofocus>
+        <button class="search-btn" onclick="doSearch()">搜索</button>
+    </div>
+
+    <div class="shortcuts">
+        <a class="shortcut" href="https://www.bilibili.com">
+            <div class="shortcut-icon" style="background:#00A1D6">B</div>
+            <span class="shortcut-name">哔哩哔哩</span>
+        </a>
+        <a class="shortcut" href="https://v.qq.com">
+            <div class="shortcut-icon" style="background:#FF6A00">腾</div>
+            <span class="shortcut-name">腾讯视频</span>
+        </a>
+        <a class="shortcut" href="https://www.iqiyi.com">
+            <div class="shortcut-icon" style="background:#00BE06">奇</div>
+            <span class="shortcut-name">爱奇艺</span>
+        </a>
+        <a class="shortcut" href="https://www.youku.com">
+            <div class="shortcut-icon" style="background:#1A91FF">优</div>
+            <span class="shortcut-name">优酷</span>
+        </a>
+        <a class="shortcut" href="https://www.youtube.com">
+            <div class="shortcut-icon" style="background:#FF0000">▶</div>
+            <span class="shortcut-name">YouTube</span>
+        </a>
+        <a class="shortcut" href="https://music.163.com">
+            <div class="shortcut-icon" style="background:#C20C0C">云</div>
+            <span class="shortcut-name">网易云音乐</span>
+        </a>
+        <a class="shortcut" href="https://www.zhihu.com">
+            <div class="shortcut-icon" style="background:#0066FF">知</div>
+            <span class="shortcut-name">知乎</span>
+        </a>
+        <a class="shortcut" href="https://www.bing.com">
+            <div class="shortcut-icon" style="background:#0078D4">B</div>
+            <span class="shortcut-name">必应</span>
+        </a>
+        <a class="shortcut" href="https://www.baidu.com">
+            <div class="shortcut-icon" style="background:#2932E1">百</div>
+            <span class="shortcut-name">百度</span>
+        </a>
+        <a class="shortcut" href="https://www.taobao.com">
+            <div class="shortcut-icon" style="background:#FF4400">淘</div>
+            <span class="shortcut-name">淘宝</span>
+        </a>
+        <a class="shortcut" href="https://map.baidu.com">
+            <div class="shortcut-icon" style="background:#2196F3">🗺</div>
+            <span class="shortcut-name">百度地图</span>
+        </a>
+        <a class="shortcut" href="https://www.douyin.com">
+            <div class="shortcut-icon" style="background:#161823">抖</div>
+            <span class="shortcut-name">抖音</span>
+        </a>
+    </div>
+</div>
+
+<script>
+// 时钟
+function updateClock() {
+    const now = new Date();
+    const h = String(now.getHours()).padStart(2, '0');
+    const m = String(now.getMinutes()).padStart(2, '0');
+    document.getElementById('clock').textContent = h + ':' + m;
+    
+    const days = ['日','一','二','三','四','五','六'];
+    const dateStr = now.getFullYear() + '年' + 
+                    (now.getMonth()+1) + '月' + 
+                    now.getDate() + '日 星期' + days[now.getDay()];
+    document.getElementById('date').textContent = dateStr;
+}
+updateClock();
+setInterval(updateClock, 10000);
+
+// 搜索
+function doSearch() {
+    const q = document.getElementById('searchInput').value.trim();
+    if (!q) return;
+    
+    if (q.match(/^https?:\/\//) || q.match(/^[\w-]+\.\w+/)) {
+        let url = q;
+        if (!q.startsWith('http')) url = 'https://' + q;
+        window.location.href = url;
+    } else {
+        window.location.href = 'https://www.bing.com/search?q=' + encodeURIComponent(q);
+    }
+}
+
+document.getElementById('searchInput').addEventListener('keydown', function(e) {
+    if (e.key === 'Enter') doSearch();
+});
+
+// 快捷方式 - 在 WebView 内跳转
+document.querySelectorAll('.shortcut').forEach(function(el) {
+    el.addEventListener('click', function(e) {
+        e.preventDefault();
+        window.location.href = this.href;
+    });
+});
+</script>
+</body>
+</html>

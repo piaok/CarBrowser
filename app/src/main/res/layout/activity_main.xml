@@ -1,0 +1,133 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:background="#1A1A2E">
+
+    <!-- 顶部工具栏 - 高度40dp适配车机 -->
+    <LinearLayout
+        android:id="@+id/toolbar"
+        android:layout_width="match_parent"
+        android:layout_height="40dp"
+        android:orientation="horizontal"
+        android:background="#16213E"
+        android:gravity="center_vertical"
+        android:paddingStart="8dp"
+        android:paddingEnd="8dp">
+
+        <!-- 后退 -->
+        <ImageButton
+            android:id="@+id/btn_back"
+            android:layout_width="36dp"
+            android:layout_height="36dp"
+            android:src="@android:drawable/ic_menu_revert"
+            android:background="?attr/selectableItemBackgroundBorderless"
+            android:contentDescription="后退"
+            android:scaleType="centerInside" />
+
+        <!-- 前进 -->
+        <ImageButton
+            android:id="@+id/btn_forward"
+            android:layout_width="36dp"
+            android:layout_height="36dp"
+            android:src="@android:drawable/ic_menu_forward"
+            android:background="?attr/selectableItemBackgroundBorderless"
+            android:contentDescription="前进"
+            android:scaleType="centerInside" />
+
+        <!-- 主页 -->
+        <ImageButton
+            android:id="@+id/btn_home"
+            android:layout_width="36dp"
+            android:layout_height="36dp"
+            android:src="@android:drawable/ic_menu_myplaces"
+            android:background="?attr/selectableItemBackgroundBorderless"
+            android:contentDescription="主页"
+            android:scaleType="centerInside" />
+
+        <!-- URL 输入栏 -->
+        <EditText
+            android:id="@+id/url_bar"
+            android:layout_width="0dp"
+            android:layout_height="32dp"
+            android:layout_weight="1"
+            android:layout_marginStart="8dp"
+            android:layout_marginEnd="8dp"
+            android:background="@drawable/url_bar_bg"
+            android:hint="输入网址或搜索"
+            android:textColorHint="#888888"
+            android:textColor="#E0E0E0"
+            android:textSize="14sp"
+            android:singleLine="true"
+            android:imeOptions="actionGo"
+            android:inputType="textUri"
+            android:paddingStart="12dp"
+            android:paddingEnd="12dp"
+            android:ellipsize="middle" />
+
+        <!-- 刷新 -->
+        <ImageButton
+            android:id="@+id/btn_refresh"
+            android:layout_width="36dp"
+            android:layout_height="36dp"
+            android:src="@android:drawable/ic_menu_rotate"
+            android:background="?attr/selectableItemBackgroundBorderless"
+            android:contentDescription="刷新"
+            android:scaleType="centerInside" />
+
+        <!-- 视频浮窗（检测到视频时显示） -->
+        <ImageButton
+            android:id="@+id/btn_video"
+            android:layout_width="36dp"
+            android:layout_height="36dp"
+            android:src="@android:drawable/ic_media_play"
+            android:background="@drawable/video_btn_bg"
+            android:contentDescription="视频工具"
+            android:scaleType="centerInside"
+            android:visibility="gone" />
+    </LinearLayout>
+
+    <!-- 进度条 -->
+    <ProgressBar
+        android:id="@+id/progress_bar"
+        style="@android:style/Widget.ProgressBar.Horizontal"
+        android:layout_width="match_parent"
+        android:layout_height="3dp"
+        android:max="100"
+        android:progressDrawable="@drawable/progress_bar_bg"
+        android:visibility="gone" />
+
+    <!-- 视频检测面板 -->
+    <LinearLayout
+        android:id="@+id/video_panel"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:background="#0F3460"
+        android:padding="8dp"
+        android:visibility="gone">
+
+        <TextView
+            android:id="@+id/video_tip"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="检测到视频"
+            android:textColor="#4CAF50"
+            android:textSize="13sp"
+            android:layout_marginBottom="4dp" />
+    </LinearLayout>
+
+    <!-- WebView 容器 -->
+    <FrameLayout
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1">
+
+        <com.carbrowser.CarWebView
+            android:id="@+id/web_view"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent" />
+    </FrameLayout>
+
+</LinearLayout>

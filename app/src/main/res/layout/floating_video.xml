@@ -1,0 +1,98 @@
+<?xml version="1.0" encoding="utf-8"?>
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="#CC000000">
+
+    <!-- 主体视频区域 -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:orientation="vertical">
+
+        <!-- 顶部控制栏 - 可拖拽 -->
+        <LinearLayout
+            android:id="@+id/drag_handle"
+            android:layout_width="match_parent"
+            android:layout_height="28dp"
+            android:background="#AA000000"
+            android:gravity="center_vertical"
+            android:orientation="horizontal"
+            android:paddingStart="8dp"
+            android:paddingEnd="4dp">
+
+            <!-- 拖拽提示 -->
+            <TextView
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="⋮⋮ 拖拽移动"
+                android:textColor="#888888"
+                android:textSize="11sp" />
+
+            <!-- 倍速显示 -->
+            <TextView
+                android:id="@+id/btn_speed"
+                android:layout_width="wrap_content"
+                android:layout_height="24dp"
+                android:background="#334CAF50"
+                android:gravity="center"
+                android:paddingStart="10dp"
+                android:paddingEnd="10dp"
+                android:text="1x"
+                android:textColor="#4CAF50"
+                android:textSize="12sp"
+                android:textStyle="bold" />
+
+            <!-- 最小化 -->
+            <ImageButton
+                android:id="@+id/btn_minimize"
+                android:layout_width="24dp"
+                android:layout_height="24dp"
+                android:layout_marginStart="4dp"
+                android:background="#33FF9800"
+                android:contentDescription="最小化"
+                android:scaleType="centerInside"
+                android:src="@android:drawable/ic_menu_crop"
+                android:text="-" />
+
+            <!-- 关闭 -->
+            <ImageButton
+                android:id="@+id/btn_close"
+                android:layout_width="24dp"
+                android:layout_height="24dp"
+                android:layout_marginStart="4dp"
+                android:background="#33F44336"
+                android:contentDescription="关闭"
+                android:scaleType="centerInside"
+                android:src="@android:drawable/ic_menu_close_clear_cancel" />
+        </LinearLayout>
+
+        <!-- ExoPlayer 播放视图 -->
+        <com.google.android.exoplayer2.ui.PlayerView
+            android:id="@+id/player_view"
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:layout_weight="1"
+            android:background="#000000"
+            android:keepScreenOn="true" />
+
+        <!-- 倍速控制栏 -->
+        <HorizontalScrollView
+            android:id="@+id/speed_bar"
+            android:layout_width="match_parent"
+            android:layout_height="36dp"
+            android:background="#AA000000"
+            android:visibility="gone">
+
+            <LinearLayout
+                android:id="@+id/speed_container"
+                android:layout_width="wrap_content"
+                android:layout_height="match_parent"
+                android:gravity="center_vertical"
+                android:orientation="horizontal"
+                android:paddingStart="4dp"
+                android:paddingEnd="4dp" />
+        </HorizontalScrollView>
+    </LinearLayout>
+</FrameLayout>

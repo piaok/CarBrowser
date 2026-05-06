@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">车机浏览器</string>
+    <color name="bg_dark">#1A1A2E</color>
+    <color name="bg_toolbar">#16213E</color>
+    <color name="accent_green">#4CAF50</color>
+    <color name="text_primary">#E0E0E0</color>
+    <color name="text_hint">#888888</color>
+    <color name="video_panel_bg">#0F3460</color>
+</resources>
