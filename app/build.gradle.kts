@@ -38,11 +38,7 @@ android {
         jvmTarget = "1.8"
     }
 
-    // 适配车机低内存
-    dexOptions {
-        javaMaxHeapSize = "512m"
     }
-}
 
 dependencies {
     implementation("androidx.core:core-ktx:1.12.0")
