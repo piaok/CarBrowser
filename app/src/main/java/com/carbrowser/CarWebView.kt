@@ -50,10 +50,7 @@ class CarWebView @JvmOverloads constructor(
 
             // 性能优化
             cacheMode = WebSettings.LOAD_DEFAULT
-            @Suppress("DEPRECATION")
-            setAppCacheEnabled(true)
-            @Suppress("DEPRECATION")
-            setAppCachePath(context.cacheDir.absolutePath)
+            // AppCache removed in API 34 — no longer needed
 
             // 渲染优化
             loadWithOverviewMode = true
