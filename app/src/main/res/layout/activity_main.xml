@@ -21,7 +21,7 @@
             android:id="@+id/btn_back"
             android:layout_width="36dp"
             android:layout_height="36dp"
-            android:src="@android:drawable/ic_menu_revert"
+            android:src="@drawable/ic_back"
             android:background="?attr/selectableItemBackgroundBorderless"
             android:contentDescription="后退"
             android:scaleType="centerInside" />
@@ -31,7 +31,7 @@
             android:id="@+id/btn_forward"
             android:layout_width="36dp"
             android:layout_height="36dp"
-            android:src="@android:drawable/ic_menu_forward"
+            android:src="@drawable/ic_forward"
             android:background="?attr/selectableItemBackgroundBorderless"
             android:contentDescription="前进"
             android:scaleType="centerInside" />
@@ -41,7 +41,7 @@
             android:id="@+id/btn_home"
             android:layout_width="36dp"
             android:layout_height="36dp"
-            android:src="@android:drawable/ic_menu_myplaces"
+            android:src="@drawable/ic_home"
             android:background="?attr/selectableItemBackgroundBorderless"
             android:contentDescription="主页"
             android:scaleType="centerInside" />
@@ -71,7 +71,7 @@
             android:id="@+id/btn_refresh"
             android:layout_width="36dp"
             android:layout_height="36dp"
-            android:src="@android:drawable/ic_menu_rotate"
+            android:src="@drawable/ic_rotate"
             android:background="?attr/selectableItemBackgroundBorderless"
             android:contentDescription="刷新"
             android:scaleType="centerInside" />
@@ -81,7 +81,7 @@
             android:id="@+id/btn_video"
             android:layout_width="36dp"
             android:layout_height="36dp"
-            android:src="@android:drawable/ic_media_play"
+            android:src="@drawable/ic_play"
             android:background="@drawable/video_btn_bg"
             android:contentDescription="视频工具"
             android:scaleType="centerInside"

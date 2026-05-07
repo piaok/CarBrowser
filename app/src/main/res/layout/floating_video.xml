@@ -53,7 +53,7 @@
                 android:background="#33FF9800"
                 android:contentDescription="最小化"
                 android:scaleType="centerInside"
-                android:src="@android:drawable/ic_menu_crop"
+                android:src="@drawable/ic_close"
                 android:text="-" />
 
             <!-- 关闭 -->
@@ -65,7 +65,7 @@
                 android:background="#33F44336"
                 android:contentDescription="关闭"
                 android:scaleType="centerInside"
-                android:src="@android:drawable/ic_menu_close_clear_cancel" />
+                android:src="@drawable/ic_close" />
         </LinearLayout>
 
         <!-- ExoPlayer 播放视图 -->
