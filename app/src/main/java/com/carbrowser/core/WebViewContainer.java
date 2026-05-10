@@ -26,9 +26,9 @@ public class WebViewContainer {
 
     private final WebView webView;
     private final Callback callback;
-    private String currentUrl = "";
-    private String currentTitle = "";
-    private boolean isLoading = false;
+    private volatile String currentUrl = "";
+    private volatile String currentTitle = "";
+    private volatile boolean isLoading = false;
 
     public interface Callback {
         void onPageStarted(String url);
@@ -120,7 +120,11 @@ public class WebViewContainer {
             @Override
             public WebResourceResponse shouldInterceptRequest(WebView view, WebResourceRequest request) {
                 String url = request.getUrl().toString();
-                String pageHost = view.getUrl() != null ? view.getUrl() : "";
+                // Use cached currentUrl instead of view.getUrl() —
+                // shouldInterceptRequest runs on a background thread and
+                // WebView.getUrl() must only be called on the main thread.
+                // (Android 16 API 36 strictly enforces this check)
+                String pageHost = currentUrl;
 
                 // Ad blocking
                 App app = App.getInstance();
