@@ -59,7 +59,7 @@ public class VideoPlayerService {
             .setBufferDurationsMs(2000, 5000, 1000, 1000) // 2s-5s buffer for low-end
             .setTargetBufferBytes(-1)
             .setPrioritizeTimeOverSizeThresholds(true)
-            .createDefaultLoadControl();
+            .build();
 
         player = new ExoPlayer.Builder(context)
             .setLoadControl(loadControl)
