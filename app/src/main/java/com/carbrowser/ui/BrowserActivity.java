@@ -177,11 +177,6 @@ public class BrowserActivity extends AppCompatActivity
             @Override public void onReceivedTitle(String title) {
                 callback.onReceivedTitle(title);
             }
-
-            @Override public void onVideoFound(String[] videoUrls) {
-                callback.onVideoFound(videoUrls);
-                runOnUiThread(() -> showVideoOptions(videoUrls));
-            }
         });
 
         // Inject video detector JS bridge

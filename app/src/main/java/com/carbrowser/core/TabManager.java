@@ -68,9 +68,6 @@ public class TabManager {
                     }
                 }
             }
-
-            @Override
-            public void onVideoFound(String[] videoUrls) {}
         });
 
         tabs.add(tab);

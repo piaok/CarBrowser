@@ -11,6 +11,7 @@ import android.webkit.WebViewClient;
 
 import androidx.appcompat.app.AppCompatActivity;
 
+import com.carbrowser.App;
 import com.carbrowser.R;
 import com.carbrowser.home.CarBridge;
 
