@@ -35,6 +35,7 @@ public class WebViewContainer {
         void onPageFinished(String url, String title);
         void onProgressChanged(int progress);
         void onReceivedTitle(String title);
+        void onDownloadRequested(String url, String contentDisposition, String mimeType);
     }
 
     public interface TabProvider {
@@ -47,6 +48,7 @@ public class WebViewContainer {
         configureSettings();
         setupWebViewClient();
         setupWebChromeClient();
+        setupDownloadListener();
     }
 
     private void configureSettings() {
@@ -157,6 +159,12 @@ public class WebViewContainer {
                     callback.onReceivedTitle(title);
                 }
             }
+        });
+    }
+
+    private void setupDownloadListener() {
+        webView.setDownloadListener((url, userAgent, contentDisposition, mimeType, contentLength) -> {
+            callback.onDownloadRequested(url, contentDisposition, mimeType);
         });
     }
 

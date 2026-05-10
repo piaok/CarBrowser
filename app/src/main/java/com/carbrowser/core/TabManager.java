@@ -69,6 +69,11 @@ public class TabManager {
                     }
                 }
             }
+
+            @Override
+            public void onDownloadRequested(String url, String contentDisposition, String mimeType) {
+                // Handled by BrowserActivity's own callback wrapper
+            }
         });
         tabHolder[0] = tab;
 

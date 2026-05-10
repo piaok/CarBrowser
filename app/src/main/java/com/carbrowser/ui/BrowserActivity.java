@@ -3,6 +3,8 @@ package com.carbrowser.ui;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.content.pm.PackageManager;
+import android.os.Build;
 import android.os.Bundle;
 import android.view.KeyEvent;
 import android.view.View;
@@ -29,6 +31,9 @@ import com.carbrowser.util.KeyHandler;
 import com.carbrowser.util.MemoryOptimizer;
 import com.carbrowser.video.VideoDetector;
 import com.carbrowser.video.VideoPlayerService;
+import com.carbrowser.download.DownloadManager;
+import com.carbrowser.download.DownloadDialog;
+import com.carbrowser.download.DownloadTask;
 
 /**
  * Main browser activity. Contains the address bar, tab container,
@@ -46,6 +51,7 @@ public class BrowserActivity extends AppCompatActivity
     private TabManager tabManager;
     private VideoDetector videoDetector;
     private VideoPlayerService videoPlayerService;
+    private DownloadManager downloadManager;
     private MemoryOptimizer memoryOptimizer;
     private BookmarkDao bookmarkDao;
     private HistoryDao historyDao;
@@ -59,10 +65,17 @@ public class BrowserActivity extends AppCompatActivity
     private ImageButton btnTabs;
     private ImageButton btnSettings;
     private ImageButton btnVideo;
+    private ImageButton btnDownload;
     private TextView tabCountBadge;
 
     // Detected video URLs from current page
     private java.util.List<String> detectedVideoUrls = new java.util.ArrayList<>();
+
+    // Pending download info (used when requesting storage permission)
+    private String pendingDownloadUrl;
+    private String pendingDownloadDisposition;
+    private String pendingDownloadMimeType;
+    private static final int REQUEST_STORAGE_PERMISSION = 1001;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -97,6 +110,7 @@ public class BrowserActivity extends AppCompatActivity
         btnTabs = findViewById(R.id.btn_tabs);
         btnSettings = findViewById(R.id.btn_settings);
         btnVideo = findViewById(R.id.btn_video);
+        btnDownload = findViewById(R.id.btn_download);
         tabCountBadge = findViewById(R.id.tab_count);
 
         urlBar.setOnEditorActionListener((v, actionId, event) -> {
@@ -137,6 +151,8 @@ public class BrowserActivity extends AppCompatActivity
         btnSettings.setOnClickListener(v -> showSettingsDialog());
 
         btnVideo.setOnClickListener(v -> showVideoToolsDialog());
+
+        btnDownload.setOnClickListener(v -> DownloadDialog.showDownloadList(this, downloadManager));
     }
 
     private void initServices() {
@@ -145,6 +161,8 @@ public class BrowserActivity extends AppCompatActivity
 
         videoDetector = new VideoDetector();
         videoPlayerService = new VideoPlayerService(this);
+
+        downloadManager = new DownloadManager(this);
 
         bookmarkDao = new BookmarkDao(this);
         historyDao = new HistoryDao(this);
@@ -204,6 +222,24 @@ public class BrowserActivity extends AppCompatActivity
 
             @Override public void onReceivedTitle(String title) {
                 callback.onReceivedTitle(title);
+            }
+
+            @Override public void onDownloadRequested(String url, String contentDisposition, String mimeType) {
+                runOnUiThread(() -> {
+                    if (checkStoragePermission()) {
+                        DownloadDialog.showConfirmDialog(
+                            BrowserActivity.this, url, contentDisposition, mimeType, downloadManager);
+                    } else {
+                        pendingDownloadUrl = url;
+                        pendingDownloadDisposition = contentDisposition;
+                        pendingDownloadMimeType = mimeType;
+                        if (Build.VERSION.SDK_INT >= 23) {
+                            requestPermissions(
+                                new String[]{android.Manifest.permission.WRITE_EXTERNAL_STORAGE},
+                                REQUEST_STORAGE_PERMISSION);
+                        }
+                    }
+                });
             }
         });
 
@@ -674,6 +710,40 @@ public class BrowserActivity extends AppCompatActivity
         }
         tabManager.destroyAll();
         videoPlayerService.releasePlayer();
+        if (downloadManager != null) {
+            downloadManager.shutdown();
+        }
+    }
+
+    // --- Storage permission for downloads ---
+
+    private boolean checkStoragePermission() {
+        if (Build.VERSION.SDK_INT >= 30) {
+            return true; // Scoped storage on Android 11+, no WRITE_EXTERNAL_STORAGE needed
+        }
+        if (Build.VERSION.SDK_INT >= 23) {
+            return checkSelfPermission(android.Manifest.permission.WRITE_EXTERNAL_STORAGE)
+                == PackageManager.PERMISSION_GRANTED;
+        }
+        return true; // Below API 23, granted at install time
+    }
+
+    @Override
+    public void onRequestPermissionsResult(int requestCode, String[] permissions, int[] grantResults) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
+        if (requestCode == REQUEST_STORAGE_PERMISSION) {
+            if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                // Permission granted, proceed with pending download
+                if (pendingDownloadUrl != null) {
+                    DownloadDialog.showConfirmDialog(this,
+                        pendingDownloadUrl, pendingDownloadDisposition,
+                        pendingDownloadMimeType, downloadManager);
+                    pendingDownloadUrl = null;
+                }
+            } else {
+                Toast.makeText(this, "需要存储权限才能下载文件", Toast.LENGTH_LONG).show();
+            }
+        }
     }
 
     // --- Fullscreen for car display ---
