@@ -1,0 +1,107 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:background="#F5F5F5">
+
+    <!-- Address Bar -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="@dimen/url_bar_height"
+        android:orientation="horizontal"
+        android:background="#FFFFFF"
+        android:gravity="center_vertical"
+        android:paddingStart="8dp"
+        android:paddingEnd="8dp"
+        android:elevation="4dp">
+
+        <ImageButton
+            android:id="@+id/btn_back"
+            android:layout_width="@dimen/nav_button_size"
+            android:layout_height="@dimen/nav_button_size"
+            android:src="@android:drawable/ic_menu_revert"
+            android:background="?attr/selectableItemBackgroundBorderless"
+            android:contentDescription="@string/btn_back_desc" />
+
+        <ImageButton
+            android:id="@+id/btn_forward"
+            android:layout_width="@dimen/nav_button_size"
+            android:layout_height="@dimen/nav_button_size"
+            android:src="@android:drawable/ic_menu_forward"
+            android:background="?attr/selectableItemBackgroundBorderless"
+            android:contentDescription="@string/btn_forward_desc" />
+
+        <EditText
+            android:id="@+id/url_bar"
+            android:layout_width="0dp"
+            android:layout_height="40dp"
+            android:layout_weight="1"
+            android:hint="@string/hint_url"
+            android:textSize="@dimen/url_bar_text_size"
+            android:singleLine="true"
+            android:imeOptions="actionGo"
+            android:inputType="textUri"
+            android:background="@android:drawable/edit_text"
+            android:paddingStart="12dp"
+            android:paddingEnd="12dp" />
+
+        <ImageButton
+            android:id="@+id/btn_refresh"
+            android:layout_width="@dimen/nav_button_size"
+            android:layout_height="@dimen/nav_button_size"
+            android:src="@android:drawable/ic_menu_rotate"
+            android:background="?attr/selectableItemBackgroundBorderless"
+            android:contentDescription="@string/btn_refresh_desc" />
+
+        <ImageButton
+            android:id="@+id/btn_home"
+            android:layout_width="@dimen/nav_button_size"
+            android:layout_height="@dimen/nav_button_size"
+            android:src="@android:drawable/ic_menu_myplaces"
+            android:background="?attr/selectableItemBackgroundBorderless"
+            android:contentDescription="@string/btn_home_desc" />
+
+        <ImageButton
+            android:id="@+id/btn_bookmark"
+            android:layout_width="@dimen/nav_button_size"
+            android:layout_height="@dimen/nav_button_size"
+            android:src="@android:drawable/btn_star"
+            android:background="?attr/selectableItemBackgroundBorderless"
+            android:contentDescription="@string/btn_bookmark_desc" />
+
+        <ImageButton
+            android:id="@+id/btn_tabs"
+            android:layout_width="@dimen/nav_button_size"
+            android:layout_height="@dimen/nav_button_size"
+            android:src="@android:drawable/ic_menu_agenda"
+            android:background="?attr/selectableItemBackgroundBorderless"
+            android:contentDescription="@string/btn_tabs_desc" />
+
+        <TextView
+            android:id="@+id/tab_count"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="1"
+            android:textSize="@dimen/tab_badge_size"
+            android:textColor="#FF6D00"
+            android:textStyle="bold" />
+    </LinearLayout>
+
+    <!-- Progress Bar -->
+    <ProgressBar
+        android:id="@+id/progress_bar"
+        style="@android:style/Widget.ProgressBar.Horizontal"
+        android:layout_width="match_parent"
+        android:layout_height="3dp"
+        android:max="100"
+        android:visibility="gone" />
+
+    <!-- Tab Container -->
+    <FrameLayout
+        android:id="@+id/tab_container"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1" />
+
+</LinearLayout>

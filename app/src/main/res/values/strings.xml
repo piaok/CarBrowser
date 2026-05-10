@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">车机浏览器</string>
+
+    <!-- Browser UI -->
+    <string name="hint_url">输入网址或搜索</string>
+    <string name="btn_back_desc">后退</string>
+    <string name="btn_forward_desc">前进</string>
+    <string name="btn_refresh_desc">刷新</string>
+    <string name="btn_home_desc">主页</string>
+    <string name="btn_bookmark_desc">书签</string>
+    <string name="btn_tabs_desc">标签页</string>
+    <string name="max_tabs_warning">最多 5 个标签页</string>
+
+    <!-- Video -->
+    <string name="video_detected">检测到视频</string>
+    <string name="video_exoplayer">ExoPlayer 播放</string>
+    <string name="video_float">浮窗播放</string>
+    <string name="video_fullscreen">全屏播放</string>
+
+    <!-- Settings -->
+    <string name="settings_adblock">广告拦截</string>
+    <string name="settings_search_engine">搜索引擎</string>
+
+    <!-- Bookmark -->
+    <string name="bookmark_added">已添加书签</string>
+    <string name="bookmark_removed">已移除书签</string>
+</resources>

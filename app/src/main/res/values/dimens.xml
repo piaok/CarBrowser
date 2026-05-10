@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Override for 1024x600 car display: larger touch targets -->
+    <dimen name="url_bar_height">52dp</dimen>
+    <dimen name="nav_button_size">48dp</dimen>
+    <dimen name="url_bar_text_size">16sp</dimen>
+    <dimen name="tab_badge_size">18sp</dimen>
+</resources>

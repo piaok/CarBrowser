@@ -1,0 +1,193 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>车机浏览器</title>
+<style>
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body {
+    font-family: -apple-system, "PingFang SC", "Microsoft YaHei", sans-serif;
+    background: linear-gradient(135deg, #1a237e 0%, #283593 50%, #1565c0 100%);
+    color: #ffffff;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 40px;
+    overflow: hidden;
+    -webkit-user-select: none;
+    user-select: none;
+}
+
+/* Clock */
+.clock-container {
+    text-align: center;
+    margin-bottom: 32px;
+}
+.clock-time {
+    font-size: 72px;
+    font-weight: 300;
+    letter-spacing: 4px;
+    animation: fadeIn 1s ease;
+}
+.clock-date {
+    font-size: 18px;
+    opacity: 0.7;
+    margin-top: 4px;
+}
+
+/* Search Bar */
+.search-container {
+    width: 80%;
+    max-width: 600px;
+    margin-bottom: 40px;
+}
+.search-bar {
+    width: 100%;
+    height: 48px;
+    border-radius: 24px;
+    border: none;
+    padding: 0 24px;
+    font-size: 18px;
+    background: rgba(255,255,255,0.15);
+    color: #ffffff;
+    outline: none;
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+}
+.search-bar::placeholder { color: rgba(255,255,255,0.5); }
+.search-bar:focus {
+    background: rgba(255,255,255,0.25);
+    box-shadow: 0 0 0 2px rgba(255,255,255,0.3);
+}
+
+/* Quick Links Grid */
+.links-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 20px;
+    width: 80%;
+    max-width: 600px;
+}
+.link-item {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 16px 8px;
+    border-radius: 16px;
+    background: rgba(255,255,255,0.1);
+    cursor: pointer;
+    transition: background 0.2s, transform 0.2s;
+    -webkit-tap-highlight-color: transparent;
+}
+.link-item:hover { background: rgba(255,255,255,0.2); }
+.link-item:active { transform: scale(0.95); }
+.link-icon {
+    width: 48px;
+    height: 48px;
+    border-radius: 12px;
+    background: rgba(255,255,255,0.2);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 24px;
+    margin-bottom: 8px;
+}
+.link-title {
+    font-size: 13px;
+    opacity: 0.9;
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(-10px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+</style>
+</head>
+<body>
+
+<div class="clock-container">
+    <div class="clock-time" id="clock">00:00</div>
+    <div class="clock-date" id="date"></div>
+</div>
+
+<div class="search-container">
+    <input type="text" class="search-bar" id="search" placeholder="输入网址或搜索..." autocomplete="off">
+</div>
+
+<div class="links-grid" id="links"></div>
+
+<script>
+// Clock update
+function updateClock() {
+    var now = new Date();
+    var h = now.getHours().toString().padStart(2, '0');
+    var m = now.getMinutes().toString().padStart(2, '0');
+    document.getElementById('clock').textContent = h + ':' + m;
+
+    var days = ['日','一','二','三','四','五','六'];
+    var dateStr = (now.getMonth()+1) + '月' + now.getDate() + '日 周' + days[now.getDay()];
+    document.getElementById('date').textContent = dateStr;
+}
+updateClock();
+setInterval(updateClock, 10000);
+
+// Search bar
+document.getElementById('search').addEventListener('keydown', function(e) {
+    if (e.key === 'Enter' && this.value.trim()) {
+        if (window.CarBridge) {
+            window.CarBridge.openUrl(this.value.trim());
+        }
+        this.value = '';
+    }
+});
+
+// Quick links
+var defaultLinks = [
+    {title:'百度', url:'https://www.baidu.com', icon:'🔍'},
+    {title:'B站', url:'https://www.bilibili.com', icon:'📺'},
+    {title:'知乎', url:'https://www.zhihu.com', icon:'💬'},
+    {title:'淘宝', url:'https://www.taobao.com', icon:'🛒'},
+    {title:'微博', url:'https://www.weibo.com', icon:'📢'},
+    {title:'京东', url:'https://www.jd.com', icon:'📦'},
+    {title:'优酷', url:'https://www.youku.com', icon:'🎬'},
+    {title:'酷狗', url:'https://www.kugou.com', icon:'🎵'}
+];
+
+function loadLinks() {
+    var container = document.getElementById('links');
+    container.innerHTML = '';
+    var links = defaultLinks;
+
+    // Try to load from CarBridge
+    if (window.CarBridge) {
+        try {
+            var json = window.CarBridge.getQuickLinks();
+            if (json) {
+                var parsed = JSON.parse(json);
+                if (parsed && parsed.length > 0) links = parsed;
+            }
+        } catch(e) {}
+    }
+
+    links.forEach(function(link) {
+        var div = document.createElement('div');
+        div.className = 'link-item';
+        div.innerHTML = '<div class="link-icon">' + (link.icon || '🌐') +
+            '</div><div class="link-title">' + link.title + '</div>';
+        div.addEventListener('click', function() {
+            if (window.CarBridge) {
+                window.CarBridge.openUrl(link.url);
+            }
+        });
+        container.appendChild(div);
+    });
+}
+
+loadLinks();
+</script>
+</body>
+</html>
