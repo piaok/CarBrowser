@@ -14,35 +14,73 @@ body {
     display: flex;
     flex-direction: column;
     align-items: center;
-    justify-content: center;
-    padding: 40px;
-    overflow: hidden;
+    padding: 30px 40px;
     -webkit-user-select: none;
     user-select: none;
+}
+
+/* Scrollable content wrapper */
+.page-wrapper {
+    width: 100%;
+    max-width: 700px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
+    flex: 1;
+}
+
+/* Top bar: clock + settings */
+.top-bar {
+    width: 100%;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
 }
 
 /* Clock */
 .clock-container {
     text-align: center;
-    margin-bottom: 32px;
 }
 .clock-time {
-    font-size: 72px;
+    font-size: 64px;
     font-weight: 300;
     letter-spacing: 4px;
     animation: fadeIn 1s ease;
 }
 .clock-date {
-    font-size: 18px;
+    font-size: 16px;
     opacity: 0.7;
-    margin-top: 4px;
+    margin-top: 2px;
 }
+
+/* Settings button */
+.settings-btn {
+    width: 44px;
+    height: 44px;
+    border-radius: 22px;
+    border: none;
+    background: rgba(255,255,255,0.15);
+    color: #ffffff;
+    font-size: 22px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    -webkit-tap-highlight-color: transparent;
+    transition: background 0.2s;
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+}
+.settings-btn:hover { background: rgba(255,255,255,0.25); }
+.settings-btn:active { background: rgba(255,255,255,0.3); }
 
 /* Search Bar */
 .search-container {
-    width: 80%;
-    max-width: 600px;
-    margin-bottom: 40px;
+    width: 100%;
+    margin-bottom: 30px;
 }
 .search-bar {
     width: 100%;
@@ -67,16 +105,15 @@ body {
 .links-grid {
     display: grid;
     grid-template-columns: repeat(4, 1fr);
-    gap: 20px;
-    width: 80%;
-    max-width: 600px;
+    gap: 16px;
+    width: 100%;
 }
 .link-item {
     display: flex;
     flex-direction: column;
     align-items: center;
     justify-content: center;
-    padding: 16px 8px;
+    padding: 14px 8px;
     border-radius: 16px;
     background: rgba(255,255,255,0.1);
     cursor: pointer;
@@ -101,6 +138,78 @@ body {
     opacity: 0.9;
 }
 
+/* Settings Panel (hidden by default) */
+.settings-panel {
+    display: none;
+    width: 100%;
+    background: rgba(255,255,255,0.1);
+    border-radius: 16px;
+    padding: 20px;
+    margin-top: 24px;
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+}
+.settings-panel.visible { display: block; }
+.settings-title {
+    font-size: 18px;
+    font-weight: 500;
+    margin-bottom: 16px;
+    opacity: 0.9;
+}
+.setting-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 12px 0;
+    border-bottom: 1px solid rgba(255,255,255,0.1);
+}
+.setting-row:last-child { border-bottom: none; }
+.setting-label {
+    font-size: 15px;
+    opacity: 0.9;
+}
+.setting-value {
+    font-size: 15px;
+    opacity: 0.7;
+}
+
+/* Toggle switch */
+.toggle {
+    width: 44px;
+    height: 24px;
+    border-radius: 12px;
+    background: rgba(255,255,255,0.3);
+    position: relative;
+    cursor: pointer;
+    transition: background 0.3s;
+    -webkit-tap-highlight-color: transparent;
+}
+.toggle.active { background: #4CAF50; }
+.toggle-knob {
+    width: 20px;
+    height: 20px;
+    border-radius: 10px;
+    background: #ffffff;
+    position: absolute;
+    top: 2px;
+    left: 2px;
+    transition: left 0.3s;
+}
+.toggle.active .toggle-knob { left: 22px; }
+
+/* Select dropdown for search engine */
+.engine-select {
+    background: rgba(255,255,255,0.15);
+    color: #ffffff;
+    border: 1px solid rgba(255,255,255,0.3);
+    border-radius: 8px;
+    padding: 4px 12px;
+    font-size: 14px;
+    outline: none;
+    -webkit-appearance: none;
+}
+.engine-select option { background: #283593; color: #ffffff; }
+
 @keyframes fadeIn {
     from { opacity: 0; transform: translateY(-10px); }
     to { opacity: 1; transform: translateY(0); }
@@ -109,16 +218,53 @@ body {
 </head>
 <body>
 
-<div class="clock-container">
-    <div class="clock-time" id="clock">00:00</div>
-    <div class="clock-date" id="date"></div>
+<div class="page-wrapper">
+
+<!-- Top Bar -->
+<div class="top-bar">
+    <div class="clock-container">
+        <div class="clock-time" id="clock">00:00</div>
+        <div class="clock-date" id="date"></div>
+    </div>
+    <button class="settings-btn" id="settingsBtn">⚙️</button>
 </div>
 
+<!-- Search Bar -->
 <div class="search-container">
     <input type="text" class="search-bar" id="search" placeholder="输入网址或搜索..." autocomplete="off">
 </div>
 
+<!-- Quick Links -->
 <div class="links-grid" id="links"></div>
+
+<!-- Settings Panel -->
+<div class="settings-panel" id="settingsPanel">
+    <div class="settings-title">⚙️ 设置</div>
+
+    <div class="setting-row">
+        <span class="setting-label">广告拦截</span>
+        <div class="toggle" id="adblockToggle">
+            <div class="toggle-knob"></div>
+        </div>
+    </div>
+
+    <div class="setting-row">
+        <span class="setting-label">搜索引擎</span>
+        <select class="engine-select" id="engineSelect">
+            <option value="baidu">百度</option>
+            <option value="google">Google</option>
+            <option value="bing">Bing</option>
+            <option value="sogou">搜狗</option>
+        </select>
+    </div>
+
+    <div class="setting-row">
+        <span class="setting-label">版本</span>
+        <span class="setting-value">1.0.0</span>
+    </div>
+</div>
+
+</div><!-- end page-wrapper -->
 
 <script>
 // Clock update
@@ -188,6 +334,37 @@ function loadLinks() {
 }
 
 loadLinks();
+
+// Settings toggle
+document.getElementById('settingsBtn').addEventListener('click', function() {
+    var panel = document.getElementById('settingsPanel');
+    panel.classList.toggle('visible');
+});
+
+// AdBlock toggle
+var adblockToggle = document.getElementById('adblockToggle');
+if (window.CarBridge) {
+    try {
+        var enabled = window.CarBridge.isAdBlockEnabled();
+        if (enabled) adblockToggle.classList.add('active');
+    } catch(e) {}
+}
+adblockToggle.addEventListener('click', function() {
+    this.classList.toggle('active');
+    // TODO: call CarBridge to persist setting
+});
+
+// Search engine select
+var engineSelect = document.getElementById('engineSelect');
+if (window.CarBridge) {
+    try {
+        var engine = window.CarBridge.getSearchEngine();
+        if (engine) engineSelect.value = engine;
+    } catch(e) {}
+}
+engineSelect.addEventListener('change', function() {
+    // TODO: call CarBridge to persist engine choice
+});
 </script>
 </body>
 </html>
