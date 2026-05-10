@@ -162,21 +162,33 @@ public class WebViewContainer {
 
     /**
      * Inject JavaScript to detect <video> elements on the page.
+     * Also sets up MutationObserver to catch dynamically loaded videos.
      */
     private void injectVideoDetector(WebView view) {
         view.evaluateJavascript(
             "(function(){" +
-            "  var videos = document.querySelectorAll('video');" +
-            "  var urls = [];" +
-            "  videos.forEach(function(v){" +
-            "    if(v.src && v.src.length > 0) urls.push(v.src);" +
-            "    if(v.currentSrc && v.currentSrc.length > 0) urls.push(v.currentSrc);" +
-            "    v.querySelectorAll('source').forEach(function(s){" +
-            "      if(s.src && s.src.length > 0) urls.push(s.src);" +
+            "  function findVideos(){" +
+            "    var urls = [];" +
+            "    document.querySelectorAll('video').forEach(function(v){" +
+            "      if(v.src && v.src.length>0 && urls.indexOf(v.src)===-1) urls.push(v.src);" +
+            "      if(v.currentSrc && v.currentSrc.length>0 && urls.indexOf(v.currentSrc)===-1) urls.push(v.currentSrc);" +
+            "      v.querySelectorAll('source').forEach(function(s){" +
+            "        if(s.src && s.src.length>0 && urls.indexOf(s.src)===-1) urls.push(s.src);" +
+            "      });" +
             "    });" +
-            "  });" +
-            "  if(urls.length > 0 && window.VideoDetector){" +
-            "    window.VideoDetector.onVideoFound(JSON.stringify(urls));" +
+            "    if(urls.length>0 && window.VideoDetector){" +
+            "      window.VideoDetector.onVideoFound(JSON.stringify(urls));" +
+            "    }" +
+            "    return urls.length;" +
+            "  }" +
+            // Immediate check
+            "  findVideos();" +
+            // Set up MutationObserver for dynamically added videos (SPA/AJAX)
+            "  if(!window._videoObserver){" +
+            "    window._videoObserver = new MutationObserver(function(mutations){" +
+            "      findVideos();" +
+            "    });" +
+            "    window._videoObserver.observe(document.documentElement, {childList:true, subtree:true});" +
             "  }" +
             "})();",
             null

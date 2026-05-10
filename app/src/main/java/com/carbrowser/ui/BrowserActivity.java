@@ -58,7 +58,11 @@ public class BrowserActivity extends AppCompatActivity
     private ImageButton btnBookmark;
     private ImageButton btnTabs;
     private ImageButton btnSettings;
+    private ImageButton btnVideo;
     private TextView tabCountBadge;
+
+    // Detected video URLs from current page
+    private java.util.List<String> detectedVideoUrls = new java.util.ArrayList<>();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -92,6 +96,7 @@ public class BrowserActivity extends AppCompatActivity
         btnBookmark = findViewById(R.id.btn_bookmark);
         btnTabs = findViewById(R.id.btn_tabs);
         btnSettings = findViewById(R.id.btn_settings);
+        btnVideo = findViewById(R.id.btn_video);
         tabCountBadge = findViewById(R.id.tab_count);
 
         urlBar.setOnEditorActionListener((v, actionId, event) -> {
@@ -130,6 +135,8 @@ public class BrowserActivity extends AppCompatActivity
         btnTabs.setOnClickListener(v -> showTabSwitcher());
 
         btnSettings.setOnClickListener(v -> showSettingsDialog());
+
+        btnVideo.setOnClickListener(v -> showVideoToolsDialog());
     }
 
     private void initServices() {
@@ -205,7 +212,16 @@ public class BrowserActivity extends AppCompatActivity
 
         videoDetector.setCallback(new VideoDetector.VideoCallback() {
             @Override public void onVideoFound(String[] videoUrls) {
-                runOnUiThread(() -> showVideoOptions(videoUrls));
+                runOnUiThread(() -> {
+                    // Save detected video URLs
+                    detectedVideoUrls.clear();
+                    for (String url : videoUrls) {
+                        if (!detectedVideoUrls.contains(url)) {
+                            detectedVideoUrls.add(url);
+                        }
+                    }
+                    showVideoOptions(videoUrls);
+                });
             }
             @Override public void onVideoError(String msg) {
                 runOnUiThread(() -> Toast.makeText(BrowserActivity.this,
@@ -282,36 +298,169 @@ public class BrowserActivity extends AppCompatActivity
         }
     }
 
+    /**
+     * Show video tools dialog — manual entry, re-detect, or play detected videos.
+     */
+    private void showVideoToolsDialog() {
+        android.app.AlertDialog.Builder builder = new android.app.AlertDialog.Builder(this);
+        builder.setTitle("视频工具");
+
+        // Build items: always show "detect" and "manual URL", then add detected videos
+        java.util.List<String> items = new java.util.ArrayList<>();
+        items.add("🔍 检测当前页面视频");
+        items.add("✏️ 输入视频URL播放");
+
+        final java.util.List<String> videoUrls = new java.util.ArrayList<>(detectedVideoUrls);
+        for (int i = 0; i < videoUrls.size(); i++) {
+            String url = videoUrls.get(i);
+            // Show short filename or domain
+            String label;
+            if (url.contains("/")) {
+                String file = url.substring(url.lastIndexOf("/") + 1);
+                label = file.length() > 30 ? file.substring(0, 27) + "..." : file;
+            } else {
+                label = url;
+            }
+            items.add("▶ " + label);
+        }
+
+        builder.setItems(items.toArray(new CharSequence[0]), (dialog, which) -> {
+            if (which == 0) {
+                // Re-detect videos on current page
+                detectVideosOnCurrentPage();
+            } else if (which == 1) {
+                // Manual URL input
+                showManualVideoUrlDialog();
+            } else {
+                // Play detected video
+                int videoIndex = which - 2;
+                if (videoIndex < videoUrls.size()) {
+                    showVideoOptionsMenu(videoUrls.get(videoIndex));
+                }
+            }
+        });
+
+        builder.setNegativeButton("关闭", null);
+        builder.show();
+    }
+
+    /**
+     * Re-run video detection JS on the current page.
+     */
+    private void detectVideosOnCurrentPage() {
+        WebViewContainer tab = tabManager.getActiveTab();
+        if (tab == null) {
+            Toast.makeText(this, "没有活动标签页", Toast.LENGTH_SHORT).show();
+            return;
+        }
+        detectedVideoUrls.clear();
+        // Inject a more thorough detection script that also checks for
+        // dynamic/iframed videos and uses MutationObserver for lazy-loaded content
+        tab.getWebView().evaluateJavascript(
+            "(function(){" +
+            "  function findVideos(){" +
+            "    var urls = [];" +
+            "    function collectFromDoc(doc){" +
+            "      try {" +
+            "        doc.querySelectorAll('video').forEach(function(v){" +
+            "          if(v.src && v.src.length>0 && urls.indexOf(v.src)===-1) urls.push(v.src);" +
+            "          if(v.currentSrc && v.currentSrc.length>0 && urls.indexOf(v.currentSrc)===-1) urls.push(v.currentSrc);" +
+            "          v.querySelectorAll('source').forEach(function(s){" +
+            "            if(s.src && s.src.length>0 && urls.indexOf(s.src)===-1) urls.push(s.src);" +
+            "          });" +
+            "        });" +
+            "        doc.querySelectorAll('iframe').forEach(function(f){" +
+            "          try { collectFromDoc(f.contentDocument); } catch(e) {}" +
+            "        });" +
+            "      } catch(e) {}" +
+            "    }" +
+            "    collectFromDoc(document);" +
+            "    if(urls.length>0 && window.VideoDetector){" +
+            "      window.VideoDetector.onVideoFound(JSON.stringify(urls));" +
+            "    }" +
+            "    return urls.length;" +
+            "  }" +
+            "  var count = findVideos();" +
+            "  if(count===0){" +
+            "    // Set up MutationObserver to watch for dynamically added videos" +
+            "    if(!window._videoObserver){" +
+            "      window._videoObserver = new MutationObserver(function(mutations){" +
+            "        findVideos();" +
+            "      });" +
+            "      window._videoObserver.observe(document.documentElement, {childList:true, subtree:true});" +
+            "    }" +
+            "    window.VideoDetector.onVideoFound('[]');" +
+            "  }" +
+            "})();",
+            null
+        );
+        Toast.makeText(this, "正在检测视频...", Toast.LENGTH_SHORT).show();
+    }
+
+    /**
+     * Show dialog for manually entering a video URL.
+     */
+    private void showManualVideoUrlDialog() {
+        android.widget.EditText input = new android.widget.EditText(this);
+        input.setHint("输入视频URL（mp4/m3u8/...）");
+        input.setSingleLine(true);
+        input.setInputType(android.text.InputType.TYPE_TEXT_VARIATION_URI);
+        // Pre-fill with current page URL as hint
+        WebViewContainer tab = tabManager.getActiveTab();
+        if (tab != null) {
+            input.setText(tab.getCurrentUrl());
+            input.selectAll();
+        }
+
+        new android.app.AlertDialog.Builder(this)
+            .setTitle("输入视频URL")
+            .setView(input)
+            .setPositiveButton("播放", (dialog, which) -> {
+                String url = input.getText().toString().trim();
+                if (!url.isEmpty()) {
+                    showVideoOptionsMenu(url);
+                }
+            })
+            .setNegativeButton("取消", null)
+            .show();
+    }
+
+    /**
+     * Show playback mode selection for a specific video URL.
+     */
+    private void showVideoOptionsMenu(String url) {
+        new android.app.AlertDialog.Builder(this)
+            .setTitle("播放视频")
+            .setItems(new CharSequence[]{"📺 ExoPlayer 播放", "🔲 浮窗播放", "🖥️ 全屏播放"}, (dialog, which) -> {
+                switch (which) {
+                    case 0:
+                        videoPlayerService.playInActivity(url, false);
+                        break;
+                    case 1:
+                        if (videoPlayerService.canDrawOverlays()) {
+                            videoPlayerService.showFloatWindow(url);
+                        } else {
+                            Intent permIntent = videoPlayerService.getOverlayPermissionIntent();
+                            if (permIntent != null) startActivity(permIntent);
+                            Toast.makeText(this, "请授权浮窗权限后重试", Toast.LENGTH_LONG).show();
+                        }
+                        break;
+                    case 2:
+                        videoPlayerService.playInActivity(url, true);
+                        break;
+                }
+            })
+            .show();
+    }
+
     private void showVideoOptions(String[] videoUrls) {
-        // Simple toast + auto-open in ExoPlayer
-        // In production, this would show a dialog with options
+        // Auto-detected video: show notification + first video options
         if (videoUrls != null && videoUrls.length > 0) {
-            String url = videoUrls[0]; // Play first video
-            new android.app.AlertDialog.Builder(this)
-                .setTitle("检测到视频")
-                .setItems(new CharSequence[]{"ExoPlayer 播放", "浮窗播放", "全屏播放"}, (dialog, which) -> {
-                    switch (which) {
-                        case 0:
-                            videoPlayerService.playInActivity(url, false);
-                            break;
-                        case 1:
-                            if (videoPlayerService.canDrawOverlays()) {
-                                videoPlayerService.showFloatWindow(url);
-                            } else {
-                                // Request overlay permission
-                                Intent permIntent = videoPlayerService.getOverlayPermissionIntent();
-                                if (permIntent != null) {
-                                    startActivity(permIntent);
-                                }
-                                Toast.makeText(this, "请授权浮窗权限后重试", Toast.LENGTH_LONG).show();
-                            }
-                            break;
-                        case 2:
-                            videoPlayerService.playInActivity(url, true);
-                            break;
-                    }
-                })
-                .show();
+            Toast.makeText(this, "检测到 " + videoUrls.length + " 个视频，点击 ▶ 按钮查看", Toast.LENGTH_SHORT).show();
+            // Auto-show playback options for first video
+            showVideoOptionsMenu(videoUrls[0]);
+        } else {
+            Toast.makeText(this, "未检测到视频，可手动输入URL", Toast.LENGTH_SHORT).show();
         }
     }
 
