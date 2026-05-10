@@ -14,6 +14,7 @@ import java.io.FileOutputStream;
 import java.io.InputStream;
 import java.net.HttpURLConnection;
 import java.net.URL;
+import java.net.URLDecoder;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.ExecutorService;
@@ -23,18 +24,31 @@ import java.util.concurrent.Executors;
  * Download engine for CarBrowser.
  * Uses HttpURLConnection + thread pool for concurrent downloads.
  * Tracks progress in SQLite database for persistence across app restarts.
+ *
+ * Key fixes:
+ * - Cross-protocol redirect handling (HTTP→HTTPS)
+ * - Realistic User-Agent (Chrome-like)
+ * - Referer header for anti-hotlink bypass
+ * - Cookie forwarding from WebView session
  */
 public class DownloadManager {
 
     private static final String TAG = "DownloadManager";
     private static final int BUFFER_SIZE = 8192;
     private static final int MAX_CONCURRENT = 3;
+    private static final int MAX_REDIRECTS = 10;
+
+    // Chrome-like UA to avoid server rejection
+    private static final String DEFAULT_UA =
+        "Mozilla/5.0 (Linux; Android 10) AppleWebKit/537.36 (KHTML, like Gecko) " +
+        "Chrome/120.0.6099.230 Mobile Safari/537.36";
 
     private final Context context;
     private final ExecutorService executor;
     private final Handler mainHandler;
     private final DownloadDb dbHelper;
     private final List<DownloadListener> listeners = new ArrayList<>();
+    private String cookies = "";
 
     public interface DownloadListener {
         void onDownloadAdded(DownloadTask task);
@@ -48,6 +62,13 @@ public class DownloadManager {
         this.executor = Executors.newFixedThreadPool(MAX_CONCURRENT);
         this.mainHandler = new Handler(Looper.getMainLooper());
         this.dbHelper = new DownloadDb(context);
+    }
+
+    /**
+     * Set cookies from WebView CookieManager for authenticated downloads.
+     */
+    public void setCookies(String cookies) {
+        this.cookies = cookies != null ? cookies : "";
     }
 
     public void addListener(DownloadListener listener) {
@@ -69,7 +90,7 @@ public class DownloadManager {
     }
 
     /**
-     * Start a new download.
+     * Start a new download. Cookies from WebView are forwarded automatically.
      */
     public DownloadTask startDownload(String url, String fileName) {
         if (fileName == null || fileName.isEmpty()) {
@@ -111,6 +132,16 @@ public class DownloadManager {
             l.onDownloadAdded(task);
         }
 
+        // Forward WebView cookies
+        try {
+            String webViewCookies = android.webkit.CookieManager.getInstance().getCookie(url);
+            if (webViewCookies != null && !webViewCookies.isEmpty()) {
+                setCookies(webViewCookies);
+            }
+        } catch (Exception e) {
+            Log.w(TAG, "Failed to get WebView cookies: " + e.getMessage());
+        }
+
         // Start download
         executor.execute(() -> doDownload(task));
 
@@ -118,65 +149,127 @@ public class DownloadManager {
     }
 
     private void doDownload(DownloadTask task) {
-        HttpURLConnection conn = null;
         InputStream is = null;
         FileOutputStream fos = null;
+        HttpURLConnection conn = null;
 
         try {
-            URL url = new URL(task.url);
-            conn = (HttpURLConnection) url.openConnection();
-            conn.setConnectTimeout(15000);
-            conn.setReadTimeout(30000);
-            conn.setRequestProperty("User-Agent", "CarBrowser/1.0");
-            conn.setRequestMethod("GET");
+            // Follow redirects manually to handle cross-protocol (HTTP→HTTPS)
+            String currentUrl = task.url;
+            int redirectCount = 0;
 
-            // Handle redirects
-            conn.setInstanceFollowRedirects(true);
+            while (redirectCount < MAX_REDIRECTS) {
+                URL url = new URL(currentUrl);
+                conn = (HttpURLConnection) url.openConnection();
+                conn.setConnectTimeout(30000);
+                conn.setReadTimeout(60000);
+                conn.setRequestMethod("GET");
+                conn.setInstanceFollowRedirects(false); // We handle redirects manually
 
-            int responseCode = conn.getResponseCode();
-            if (responseCode != HttpURLConnection.HTTP_OK && responseCode != HttpURLConnection.HTTP_PARTIAL) {
-                throw new Exception("HTTP " + responseCode);
-            }
+                // Headers for compatibility
+                conn.setRequestProperty("User-Agent", DEFAULT_UA);
+                conn.setRequestProperty("Accept", "*/*");
+                conn.setRequestProperty("Accept-Encoding", "identity"); // No gzip for downloads
+                conn.setRequestProperty("Referer", extractReferer(task.url));
+                if (!cookies.isEmpty()) {
+                    conn.setRequestProperty("Cookie", cookies);
+                }
 
-            int contentLength = conn.getContentLength();
-            task.totalBytes = contentLength > 0 ? contentLength : -1;
-            task.status = DownloadTask.STATUS_RUNNING;
-            updateTask(task);
+                int responseCode = conn.getResponseCode();
 
-            is = conn.getInputStream();
-            fos = new FileOutputStream(task.filePath);
+                // Handle redirects (301, 302, 303, 307, 308)
+                if (responseCode == HttpURLConnection.HTTP_MOVED_PERM ||
+                    responseCode == HttpURLConnection.HTTP_MOVED_TEMP ||
+                    responseCode == HttpURLConnection.HTTP_SEE_OTHER ||
+                    responseCode == 307 || responseCode == 308) {
+                    String location = conn.getHeaderField("Location");
+                    if (location == null || location.isEmpty()) {
+                        throw new Exception("Redirect without Location header (HTTP " + responseCode + ")");
+                    }
+                    // Handle relative URLs
+                    if (!location.startsWith("http")) {
+                        URL base = new URL(currentUrl);
+                        location = new URL(base, location).toString();
+                    }
+                    // Update cookies from redirect response
+                    String newCookies = conn.getHeaderField("Set-Cookie");
+                    if (newCookies != null && !newCookies.isEmpty()) {
+                        cookies = mergeCookies(cookies, newCookies);
+                    }
+                    conn.disconnect();
+                    conn = null;
+                    currentUrl = location;
+                    redirectCount++;
+                    Log.d(TAG, "Redirect #" + redirectCount + " → " + location);
+                    continue;
+                }
 
-            byte[] buffer = new byte[BUFFER_SIZE];
-            long lastNotifyTime = 0;
-            int bytesRead;
-            long totalRead = 0;
+                // Not a redirect — check for success
+                if (responseCode != HttpURLConnection.HTTP_OK &&
+                    responseCode != HttpURLConnection.HTTP_PARTIAL) {
+                    // Read error body for more info
+                    String errorBody = "";
+                    try {
+                        InputStream errStream = conn.getErrorStream();
+                        if (errStream != null) {
+                            byte[] errBuf = new byte[1024];
+                            int errRead = errStream.read(errBuf);
+                            if (errRead > 0) errorBody = new String(errBuf, 0, errRead);
+                        }
+                    } catch (Exception ignored) {}
+                    throw new Exception("HTTP " + responseCode +
+                        (errorBody.length() > 0 ? ": " + errorBody.substring(0, 100) : ""));
+                }
 
-            while ((bytesRead = is.read(buffer)) != -1) {
-                fos.write(buffer, 0, bytesRead);
-                totalRead += bytesRead;
-                task.downloadedBytes = totalRead;
+                // Success — download the file
+                int contentLength = conn.getContentLength();
+                task.totalBytes = contentLength > 0 ? contentLength : -1;
+                task.status = DownloadTask.STATUS_RUNNING;
+                updateTask(task);
 
-                // Notify progress at most once per 500ms
-                long now = System.currentTimeMillis();
-                if (now - lastNotifyTime > 500 || task.totalBytes > 0 && totalRead == task.totalBytes) {
-                    lastNotifyTime = now;
-                    int percent = task.totalBytes > 0 ? (int) (totalRead * 100 / task.totalBytes) : -1;
-                    task.progress = percent;
-                    updateTask(task);
-                    for (DownloadListener l : listeners) {
-                        mainHandler.post(() -> l.onDownloadProgress(task, percent));
+                is = conn.getInputStream();
+                fos = new FileOutputStream(task.filePath);
+
+                byte[] buffer = new byte[BUFFER_SIZE];
+                long lastNotifyTime = 0;
+                int bytesRead;
+                long totalRead = 0;
+
+                while ((bytesRead = is.read(buffer)) != -1) {
+                    fos.write(buffer, 0, bytesRead);
+                    totalRead += bytesRead;
+                    task.downloadedBytes = totalRead;
+
+                    // Notify progress at most once per 500ms
+                    long now = System.currentTimeMillis();
+                    if (now - lastNotifyTime > 500 || task.totalBytes > 0 && totalRead == task.totalBytes) {
+                        lastNotifyTime = now;
+                        int percent = task.totalBytes > 0 ? (int) (totalRead * 100 / task.totalBytes) : -1;
+                        task.progress = percent;
+                        updateTask(task);
+                        for (DownloadListener l : listeners) {
+                            mainHandler.post(() -> l.onDownloadProgress(task, percent));
+                        }
                     }
                 }
-            }
 
-            fos.flush();
-            task.status = DownloadTask.STATUS_COMPLETE;
-            task.progress = 100;
-            updateTask(task);
+                fos.flush();
+                task.status = DownloadTask.STATUS_COMPLETE;
+                task.progress = 100;
+                // Update actual file size
+                File f = new File(task.filePath);
+                task.totalBytes = f.length();
+                task.downloadedBytes = f.length();
+                updateTask(task);
 
-            for (DownloadListener l : listeners) {
-                mainHandler.post(() -> l.onDownloadComplete(task));
-            }
+                for (DownloadListener l : listeners) {
+                    mainHandler.post(() -> l.onDownloadComplete(task));
+                }
+                return; // Done!
+
+            } // end redirect loop
+
+            throw new Exception("Too many redirects (" + redirectCount + ")");
 
         } catch (Exception e) {
             Log.e(TAG, "Download failed: " + e.getMessage());
@@ -199,6 +292,28 @@ public class DownloadManager {
     }
 
     /**
+     * Extract referer from URL (use the origin as referer).
+     */
+    private String extractReferer(String url) {
+        try {
+            URL u = new URL(url);
+            return u.getProtocol() + "://" + u.getHost() + "/";
+        } catch (Exception e) {
+            return url;
+        }
+    }
+
+    /**
+     * Merge new cookies into existing cookie string.
+     */
+    private String mergeCookies(String existing, String newCookie) {
+        if (existing.isEmpty()) return newCookie;
+        // Simple merge: append new cookies
+        // In production, would parse and deduplicate by name
+        return existing + "; " + newCookie;
+    }
+
+    /**
      * Get all download tasks from database.
      */
     public List<DownloadTask> getAllTasks() {
@@ -217,7 +332,7 @@ public class DownloadManager {
     }
 
     /**
-     * Delete a download task and its file.
+     * Delete a download task and optionally its file.
      */
     public void deleteTask(long id, boolean deleteFile) {
         DownloadTask task = getTask(id);
@@ -227,6 +342,16 @@ public class DownloadManager {
         }
         SQLiteDatabase db = dbHelper.getWritableDatabase();
         db.delete("downloads", "id = ?", new String[]{String.valueOf(id)});
+    }
+
+    /**
+     * Retry a failed download.
+     */
+    public DownloadTask retryDownload(DownloadTask failedTask) {
+        // Delete old record
+        deleteTask(failedTask.id, false);
+        // Start fresh download with same URL
+        return startDownload(failedTask.url, failedTask.fileName);
     }
 
     private DownloadTask getTask(long id) {
@@ -285,6 +410,10 @@ public class DownloadManager {
         try {
             String path = new URL(url).getPath();
             String name = path.substring(path.lastIndexOf('/') + 1);
+            // URL-decode the filename
+            if (name.contains("%")) {
+                name = URLDecoder.decode(name, "UTF-8");
+            }
             if (name.isEmpty() || name.length() > 100) {
                 name = "download_" + System.currentTimeMillis();
             }
@@ -298,7 +427,6 @@ public class DownloadManager {
      * Guess filename from URL and Content-Disposition header.
      */
     public static String guessFileName(String url, String contentDisposition, String mimeType) {
-        // Use Android's built-in guesser
         return android.webkit.URLUtil.guessFileName(url, contentDisposition, mimeType);
     }
 
