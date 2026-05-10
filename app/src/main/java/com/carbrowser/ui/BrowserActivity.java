@@ -1,5 +1,6 @@
 package com.carbrowser.ui;
 
+import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
@@ -56,6 +57,7 @@ public class BrowserActivity extends AppCompatActivity
     private ImageButton btnHome;
     private ImageButton btnBookmark;
     private ImageButton btnTabs;
+    private ImageButton btnSettings;
     private TextView tabCountBadge;
 
     @Override
@@ -89,6 +91,7 @@ public class BrowserActivity extends AppCompatActivity
         btnHome = findViewById(R.id.btn_home);
         btnBookmark = findViewById(R.id.btn_bookmark);
         btnTabs = findViewById(R.id.btn_tabs);
+        btnSettings = findViewById(R.id.btn_settings);
         tabCountBadge = findViewById(R.id.tab_count);
 
         urlBar.setOnEditorActionListener((v, actionId, event) -> {
@@ -125,6 +128,8 @@ public class BrowserActivity extends AppCompatActivity
         btnBookmark.setOnClickListener(v -> toggleBookmark());
 
         btnTabs.setOnClickListener(v -> showTabSwitcher());
+
+        btnSettings.setOnClickListener(v -> showSettingsDialog());
     }
 
     private void initServices() {
@@ -237,11 +242,21 @@ public class BrowserActivity extends AppCompatActivity
         String input = urlBar.getText().toString();
         String engine = getSearchEngine();
         String url = UrlBarHandler.processInput(input, engine);
+
+        // Hide soft keyboard first
+        android.view.inputmethod.InputMethodManager imm =
+            (android.view.inputmethod.InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
+        if (imm != null) {
+            imm.hideSoftInputFromWindow(urlBar.getWindowToken(), 0);
+        }
+
+        urlBar.clearFocus();
+
         WebViewContainer tab = tabManager.getActiveTab();
         if (tab != null) {
             tab.loadUrl(url);
         }
-        urlBar.clearFocus();
+
         hideSystemUI();
     }
 
@@ -316,6 +331,109 @@ public class BrowserActivity extends AppCompatActivity
                 tabManager.closeTab(tabManager.getActiveTabIndex());
             })
             .show();
+    }
+
+    private void showSettingsDialog() {
+        String currentEngine = getSearchEngine();
+        String[] engineNames = {"百度", "Google", "Bing", "搜狗"};
+        String[] engineKeys = {"baidu", "google", "bing", "sogou"};
+        int checkedItem = 0;
+        for (int i = 0; i < engineKeys.length; i++) {
+            if (engineKeys[i].equals(currentEngine)) { checkedItem = i; break; }
+        }
+
+        // Build settings items
+        String[] items = new String[3];
+        items[0] = "广告拦截: " + (isAdBlockEnabled() ? "已开启" : "已关闭");
+        items[1] = "搜索引擎: " + engineNames[checkedItem];
+        items[2] = "查看崩溃日志";
+
+        new android.app.AlertDialog.Builder(this)
+            .setTitle("⚙️ 设置")
+            .setItems(items, (dialog, which) -> {
+                switch (which) {
+                    case 0:
+                        toggleAdBlock();
+                        break;
+                    case 1:
+                        showSearchEngineDialog(engineNames, engineKeys);
+                        break;
+                    case 2:
+                        showCrashLogFromBrowser();
+                        break;
+                }
+            })
+            .setNegativeButton("关闭", null)
+            .show();
+    }
+
+    private boolean isAdBlockEnabled() {
+        App app = App.getInstance();
+        return app != null && app.getAdBlocker() != null && app.getAdBlocker().isEnabled();
+    }
+
+    private void toggleAdBlock() {
+        App app = App.getInstance();
+        if (app != null && app.getAdBlocker() != null) {
+            boolean newState = !app.getAdBlocker().isEnabled();
+            app.getAdBlocker().setEnabled(newState);
+            Toast.makeText(this, "广告拦截: " + (newState ? "已开启" : "已关闭"),
+                Toast.LENGTH_SHORT).show();
+        }
+    }
+
+    private void showSearchEngineDialog(String[] names, String[] keys) {
+        String current = getSearchEngine();
+        int checked = 0;
+        for (int i = 0; i < keys.length; i++) {
+            if (keys[i].equals(current)) { checked = i; break; }
+        }
+        new android.app.AlertDialog.Builder(this)
+            .setTitle("搜索引擎")
+            .setSingleChoiceItems(names, checked, (dialog, which) -> {
+                getSharedPreferences(PREFS_NAME, MODE_PRIVATE)
+                    .edit().putString(KEY_SEARCH_ENGINE, keys[which]).apply();
+                Toast.makeText(this, "搜索引擎: " + names[which],
+                    Toast.LENGTH_SHORT).show();
+                dialog.dismiss();
+            })
+            .setNegativeButton("取消", null)
+            .show();
+    }
+
+    private void showCrashLogFromBrowser() {
+        java.io.File logFile = App.getCrashLogFile(this);
+        if (!logFile.exists() || logFile.length() == 0) {
+            Toast.makeText(this, "没有崩溃日志", Toast.LENGTH_SHORT).show();
+            return;
+        }
+        try {
+            StringBuilder sb = new StringBuilder();
+            java.io.BufferedReader reader = new java.io.BufferedReader(new java.io.FileReader(logFile));
+            String line;
+            while ((line = reader.readLine()) != null) {
+                sb.append(line).append("\n");
+            }
+            reader.close();
+
+            android.widget.TextView tv = new android.widget.TextView(this);
+            tv.setText(sb.toString());
+            tv.setTextSize(12);
+            tv.setPadding(24, 24, 24, 24);
+            tv.setTextIsSelectable(true);
+
+            android.widget.ScrollView scrollView = new android.widget.ScrollView(this);
+            scrollView.addView(tv);
+
+            new android.app.AlertDialog.Builder(this)
+                .setTitle("崩溃日志")
+                .setView(scrollView)
+                .setPositiveButton("关闭", null)
+                .setNeutralButton("清除", (d, w) -> logFile.delete())
+                .show();
+        } catch (Exception e) {
+            Toast.makeText(this, "读取日志失败", Toast.LENGTH_SHORT).show();
+        }
     }
 
     private void updateTabBadge() {
