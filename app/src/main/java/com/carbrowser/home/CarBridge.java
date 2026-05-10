@@ -34,8 +34,10 @@ public class CarBridge {
     }
 
     @JavascriptInterface
-    public void openUrl(String url) {
+    public void openUrl(String input) {
         if (callback != null) {
+            // Smart detection: URL or search query
+            String url = com.carbrowser.core.UrlBarHandler.processInput(input, getSearchEngine());
             callback.openUrl(url);
         }
     }
