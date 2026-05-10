@@ -5,7 +5,7 @@ plugins {
 
 android {
     namespace 'com.carbrowser'
-    compileSdk 28
+    compileSdk 33
 
     defaultConfig {
         applicationId "com.carbrowser"
