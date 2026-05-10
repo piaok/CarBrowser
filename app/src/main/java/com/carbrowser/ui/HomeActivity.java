@@ -8,12 +8,19 @@ import android.webkit.WebChromeClient;
 import android.webkit.WebSettings;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
+import android.widget.ScrollView;
+import android.widget.TextView;
 
+import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 
 import com.carbrowser.App;
 import com.carbrowser.R;
 import com.carbrowser.home.CarBridge;
+
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileReader;
 
 /**
  * Home activity that displays the offline homepage.
@@ -74,6 +81,9 @@ public class HomeActivity extends AppCompatActivity {
 
         homeWebView.addJavascriptInterface(carBridge, "CarBridge");
         homeWebView.loadUrl("file:///android_asset/homepage.html");
+
+        // Show crash log on resume if exists
+        showCrashLogIfAny();
     }
 
     private void configureWebView() {
@@ -94,7 +104,54 @@ public class HomeActivity extends AppCompatActivity {
             startActivity(new Intent(this, BrowserActivity.class));
             return true;
         }
+        // BACK key shows crash log (if any) for debugging
+        if (keyCode == KeyEvent.KEYCODE_BACK) {
+            showCrashLogIfAny();
+            return true;
+        }
         return super.onKeyDown(keyCode, event);
+    }
+
+    /**
+     * If crash.log exists, show it in a dialog so user can report it.
+     */
+    private void showCrashLogIfAny() {
+        File logFile = App.getCrashLogFile(this);
+        if (!logFile.exists() || logFile.length() == 0) return;
+
+        try {
+            StringBuilder sb = new StringBuilder();
+            BufferedReader reader = new BufferedReader(new FileReader(logFile));
+            String line;
+            while ((line = reader.readLine()) != null) {
+                sb.append(line).append("\n");
+            }
+            reader.close();
+
+            String logContent = sb.toString();
+            if (logContent.trim().isEmpty()) return;
+
+            // Show in scrollable dialog
+            TextView tv = new TextView(this);
+            tv.setText(logContent);
+            tv.setTextSize(12);
+            tv.setPadding(24, 24, 24, 24);
+            tv.setTextIsSelectable(true);
+
+            ScrollView scrollView = new ScrollView(this);
+            scrollView.addView(tv);
+
+            new AlertDialog.Builder(this)
+                .setTitle("⚠️ 上次崩溃日志")
+                .setView(scrollView)
+                .setPositiveButton("关闭", null)
+                .setNeutralButton("清除日志", (dialog, which) -> {
+                    logFile.delete();
+                })
+                .show();
+        } catch (Exception e) {
+            // Ignore
+        }
     }
 
     @Override
