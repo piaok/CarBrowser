@@ -184,7 +184,7 @@ public class BrowserActivity extends AppCompatActivity
 
         videoDetector.setCallback(new VideoDetector.VideoCallback() {
             @Override public void onVideoFound(String[] videoUrls) {
-                // Already handled above
+                runOnUiThread(() -> showVideoOptions(videoUrls));
             }
             @Override public void onVideoError(String msg) {
                 runOnUiThread(() -> Toast.makeText(BrowserActivity.this,

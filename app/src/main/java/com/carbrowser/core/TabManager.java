@@ -42,6 +42,7 @@ public class TabManager {
             return -1;
         }
 
+        final WebViewContainer[] tabHolder = new WebViewContainer[1];
         WebViewContainer tab = provider.createTab(new WebViewContainer.Callback() {
             @Override
             public void onPageStarted(String url1) {}
@@ -49,7 +50,7 @@ public class TabManager {
             @Override
             public void onPageFinished(String url1, String title) {
                 if (listener != null) {
-                    int idx = tabs.indexOf(tab);
+                    int idx = tabs.indexOf(tabHolder[0]);
                     if (idx == activeTabIndex) {
                         listener.onTabChanged(idx, title, url1);
                     }
@@ -62,13 +63,14 @@ public class TabManager {
             @Override
             public void onReceivedTitle(String title) {
                 if (listener != null) {
-                    int idx = tabs.indexOf(tab);
+                    int idx = tabs.indexOf(tabHolder[0]);
                     if (idx == activeTabIndex) {
-                        listener.onTabChanged(idx, title, tab.getCurrentUrl());
+                        listener.onTabChanged(idx, title, tabHolder[0].getCurrentUrl());
                     }
                 }
             }
         });
+        tabHolder[0] = tab;
 
         tabs.add(tab);
         int index = tabs.size() - 1;
