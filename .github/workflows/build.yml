@@ -23,14 +23,14 @@ jobs:
       with:
         gradle-version: '7.6.4'
 
-    - name: Build Release APK
-      run: gradle assembleRelease
+    - name: Build Debug APK
+      run: gradle assembleDebug
 
     - name: Upload APK as artifact
       uses: actions/upload-artifact@v4
       with:
         name: CarBrowser-APK
-        path: app/build/outputs/apk/release/*.apk
+        path: app/build/outputs/apk/debug/*.apk
 
     - name: List built APKs
-      run: ls -lh app/build/outputs/apk/release/
+      run: ls -lh app/build/outputs/apk/debug/
