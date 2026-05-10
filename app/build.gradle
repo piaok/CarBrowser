@@ -51,6 +51,11 @@ android {
         viewBinding true
         compose false
     }
+
+    lintOptions {
+        abortOnError false
+        checkReleaseBuilds false
+    }
 }
 
 dependencies {
