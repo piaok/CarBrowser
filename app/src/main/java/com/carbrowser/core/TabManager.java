@@ -49,7 +49,7 @@ public class TabManager {
 
             @Override
             public void onPageFinished(String url1, String title) {
-                if (listener != null) {
+                if (listener != null && tabHolder[0] != null) {
                     int idx = tabs.indexOf(tabHolder[0]);
                     if (idx == activeTabIndex) {
                         listener.onTabChanged(idx, title, url1);
@@ -62,7 +62,7 @@ public class TabManager {
 
             @Override
             public void onReceivedTitle(String title) {
-                if (listener != null) {
+                if (listener != null && tabHolder[0] != null) {
                     int idx = tabs.indexOf(tabHolder[0]);
                     if (idx == activeTabIndex) {
                         listener.onTabChanged(idx, title, tabHolder[0].getCurrentUrl());

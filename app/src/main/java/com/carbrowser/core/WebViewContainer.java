@@ -108,9 +108,12 @@ public class WebViewContainer {
                 injectVideoDetector(view);
 
                 // Inject ad-hiding CSS
-                AdBlocker blocker = App.getInstance().getAdBlocker();
-                if (blocker.isEnabled()) {
-                    blocker.injectHideRules(view);
+                App app = App.getInstance();
+                if (app != null) {
+                    AdBlocker blocker = app.getAdBlocker();
+                    if (blocker != null && blocker.isEnabled()) {
+                        blocker.injectHideRules(view);
+                    }
                 }
             }
 
@@ -120,12 +123,15 @@ public class WebViewContainer {
                 String pageHost = view.getUrl() != null ? view.getUrl() : "";
 
                 // Ad blocking
-                AdBlocker blocker = App.getInstance().getAdBlocker();
-                if (blocker.isEnabled() && blocker.shouldBlock(url, pageHost)) {
-                    return new WebResourceResponse(
-                        "text/plain", "utf-8",
-                        new ByteArrayInputStream("".getBytes())
-                    );
+                App app = App.getInstance();
+                if (app != null) {
+                    AdBlocker blocker = app.getAdBlocker();
+                    if (blocker != null && blocker.isEnabled() && blocker.shouldBlock(url, pageHost)) {
+                        return new WebResourceResponse(
+                            "text/plain", "utf-8",
+                            new ByteArrayInputStream("".getBytes())
+                        );
+                    }
                 }
 
                 return super.shouldInterceptRequest(view, request);

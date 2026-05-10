@@ -67,7 +67,8 @@ public class HomeActivity extends AppCompatActivity {
 
             @Override
             public boolean isAdBlockEnabled() {
-                return App.getInstance().getAdBlocker().isEnabled();
+                App app = App.getInstance();
+                return app != null && app.getAdBlocker() != null && app.getAdBlocker().isEnabled();
             }
         });
 

@@ -42,7 +42,7 @@
             android:singleLine="true"
             android:imeOptions="actionGo"
             android:inputType="textUri"
-            android:background="@android:drawable/edit_text"
+            android:background="@android:color/transparent"
             android:paddingStart="12dp"
             android:paddingEnd="12dp" />
 
