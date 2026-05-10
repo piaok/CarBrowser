@@ -45,7 +45,7 @@ public class HomeActivity extends AppCompatActivity {
             @Override
             public void openUrl(String url) {
                 Intent intent = new Intent(HomeActivity.this, BrowserActivity.class);
-                intent.setData(android.net.Uri.parse(url));
+                intent.putExtra("url", url);
                 startActivity(intent);
             }
 

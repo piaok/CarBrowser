@@ -74,8 +74,9 @@ public class BrowserActivity extends AppCompatActivity
         initServices();
         initFirstTab();
 
-        // Handle incoming intent (from homepage quick links)
-        handleIntent(getIntent());
+        // Note: handleIntent is NOT called here because initFirstTab already
+        // processes the incoming URL. For subsequent intents (singleTask),
+        // onNewIntent -> handleIntent handles them.
     }
 
     private void initViews() {
@@ -141,10 +142,25 @@ public class BrowserActivity extends AppCompatActivity
     }
 
     private void initFirstTab() {
-        String startUrl = getSharedPreferences(PREFS_NAME, MODE_PRIVATE)
-            .getString("home_url", "");
-        if (startUrl.isEmpty()) {
-            startUrl = "file:///android_asset/homepage.html";
+        // Check if we have an incoming URL from HomeActivity
+        String incomingUrl = null;
+        Intent intent = getIntent();
+        if (intent != null) {
+            incomingUrl = intent.getStringExtra("url");
+            if (incomingUrl == null && intent.getData() != null) {
+                incomingUrl = intent.getData().toString();
+            }
+        }
+
+        String startUrl;
+        if (incomingUrl != null && !incomingUrl.isEmpty()) {
+            startUrl = incomingUrl;
+        } else {
+            startUrl = getSharedPreferences(PREFS_NAME, MODE_PRIVATE)
+                .getString("home_url", "");
+            if (startUrl.isEmpty()) {
+                startUrl = "file:///android_asset/homepage.html";
+            }
         }
         tabManager.newTab(this, startUrl);
     }
@@ -348,10 +364,21 @@ public class BrowserActivity extends AppCompatActivity
     }
 
     private void handleIntent(Intent intent) {
-        if (intent != null && intent.getData() != null) {
-            String url = intent.getData().toString();
+        if (intent == null) return;
+
+        // Priority 1: explicit "url" extra (from HomeActivity quick links)
+        String url = intent.getStringExtra("url");
+
+        // Priority 2: intent data URI
+        if (url == null && intent.getData() != null) {
+            url = intent.getData().toString();
+        }
+
+        if (url != null && !url.isEmpty()) {
             WebViewContainer tab = tabManager.getActiveTab();
-            if (tab != null) tab.loadUrl(url);
+            if (tab != null) {
+                tab.loadUrl(url);
+            }
         }
     }
 
