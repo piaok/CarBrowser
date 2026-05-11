@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- ===== LazyLines TV Dimensions (Projector / 1080p) ===== -->
+
+    <!-- Overscan safe margin: 10% of 1080 = 108px ≈ 56dp on mdpi -->
+    <dimen name="overscan_padding">56dp</dimen>
+
+    <!-- Side navigation bar -->
+    <dimen name="side_nav_width">72dp</dimen>
+    <dimen name="side_nav_item_size">56dp</dimen>
+    <dimen name="side_nav_icon_size">24dp</dimen>
+    <dimen name="side_nav_label_size">10sp</dimen>
+
+    <!-- Address bar -->
+    <dimen name="tv_url_bar_height">44dp</dimen>
+    <dimen name="tv_url_bar_text_size">16sp</dimen>
+    <dimen name="tv_nav_button_size">40dp</dimen>
+
+    <!-- Focus indicator -->
+    <dimen name="focus_stroke_width">2dp</dimen>
+    <dimen name="focus_glow_radius">3dp</dimen>
+
+    <!-- Content area -->
+    <dimen name="content_scroll_step">200dp</dimen>
+
+    <!-- TV Homepage -->
+    <dimen name="tv_home_logo_size">28sp</dimen>
+    <dimen name="tv_home_search_height">48dp</dimen>
+    <dimen name="tv_home_quick_link_size">80dp</dimen>
+    <dimen name="tv_home_quick_link_icon">28sp</dimen>
+    <dimen name="tv_home_quick_link_label">12sp</dimen>
+
+    <!-- Panel (bookmarks, settings) -->
+    <dimen name="tv_panel_width_ratio">75%</dimen>
+    <dimen name="tv_panel_item_height">52dp</dimen>
+    <dimen name="tv_panel_item_text">18sp</dimen>
+    <dimen name="tv_panel_icon_size">24dp</dimen>
+
+    <!-- Video player controls -->
+    <dimen name="tv_video_btn_size">44dp</dimen>
+    <dimen name="tv_video_progress_height">4dp</dimen>
+    <dimen name="tv_video_time_text">14sp</dimen>
+
+    <!-- Minimum touch/focus target on TV -->
+    <dimen name="tv_min_target">48dp</dimen>
+</resources>

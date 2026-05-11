@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Focusable background: transparent default, accent border + glow on focus -->
+<selector xmlns:android="http://schemas.android.com/apk/res/android">
+    <item android:state_focused="true">
+        <layer-list>
+            <!-- Glow effect -->
+            <item>
+                <shape android:shape="rectangle">
+                    <solid android:color="#1A4FC3F7" />
+                    <corners android:radius="8dp" />
+                    <stroke android:width="3dp" android:color="#4FC3F7" />
+                </shape>
+            </item>
+        </layer-list>
+    </item>
+    <item>
+        <shape android:shape="rectangle">
+            <solid android:color="@android:color/transparent" />
+            <corners android:radius="8dp" />
+        </shape>
+    </item>
+</selector>

@@ -1,0 +1,715 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>LazyLines Browser for Projector — UI 设计稿</title>
+<style>
+  :root {
+    --bg-primary: #0D0D0D;
+    --bg-secondary: #1A1A1A;
+    --bg-surface: #242424;
+    --bg-nav: #141414;
+    --fg-primary: #F0F0F0;
+    --fg-secondary: #A0A0A0;
+    --accent: #4FC3F7;
+    --accent-dim: #1A5A7A;
+    --focus-glow: #4FC3F7;
+    --danger: #EF5350;
+    --success: #66BB6A;
+    --border: #333333;
+    --overscan: rgba(255, 165, 0, 0.15);
+  }
+  * { margin:0; padding:0; box-sizing:border-box; }
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    background: var(--bg-primary); color: var(--fg-primary);
+    line-height: 1.6;
+  }
+  .page { max-width: 1200px; margin: 0 auto; padding: 40px 20px; }
+
+  h1 { font-size: 28px; margin-bottom: 8px; color: var(--accent); }
+  h2 { font-size: 22px; margin: 40px 0 16px; color: var(--fg-primary); border-left: 4px solid var(--accent); padding-left: 12px; }
+  h3 { font-size: 18px; margin: 24px 0 12px; color: var(--fg-secondary); }
+  .subtitle { color: var(--fg-secondary); font-size: 14px; margin-bottom: 32px; }
+
+  /* Design Tokens Table */
+  table { width: 100%; border-collapse: collapse; margin: 16px 0; font-size: 14px; }
+  th { background: var(--bg-surface); color: var(--accent); text-align: left; padding: 10px 12px; border: 1px solid var(--border); }
+  td { padding: 8px 12px; border: 1px solid var(--border); }
+  tr:nth-child(even) { background: var(--bg-secondary); }
+
+  .color-swatch { display: inline-block; width: 20px; height: 20px; border-radius: 4px; vertical-align: middle; margin-right: 6px; border: 1px solid #555; }
+
+  /* Screen Mockups */
+  .mockup-container { display: flex; gap: 24px; flex-wrap: wrap; margin: 20px 0; }
+  .mockup {
+    flex: 1; min-width: 560px; max-width: 640px;
+    background: var(--bg-primary);
+    border: 2px solid var(--border);
+    border-radius: 8px;
+    overflow: hidden;
+    position: relative;
+  }
+  .mockup-label { text-align: center; color: var(--fg-secondary); font-size: 13px; margin-bottom: 8px; }
+
+  /* TV Frame */
+  .tv-frame {
+    position: relative;
+    width: 100%;
+    aspect-ratio: 16/9;
+    background: var(--bg-primary);
+    overflow: hidden;
+  }
+  .overscan-zone {
+    position: absolute;
+    inset: 0;
+    border: 16px solid var(--overscan);
+    pointer-events: none;
+    z-index: 10;
+  }
+  .overscan-label {
+    position: absolute;
+    color: #FFA500;
+    font-size: 9px;
+    z-index: 11;
+    opacity: 0.7;
+  }
+  .overscan-label.top { top: 2px; left: 50%; transform: translateX(-50%); }
+  .overscan-label.bottom { bottom: 2px; left: 50%; transform: translateX(-50%); }
+  .overscan-label.left { left: 2px; top: 50%; transform: translateY(-50%); writing-mode: vertical-lr; }
+  .overscan-label.right { right: 2px; top: 50%; transform: translateY(-50%); writing-mode: vertical-rl; }
+
+  /* Safe area */
+  .safe-area {
+    position: absolute;
+    top: 16px; left: 16px; right: 16px; bottom: 16px;
+    display: flex;
+  }
+
+  /* Side Nav */
+  .side-nav {
+    width: 58px;
+    background: var(--bg-nav);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 12px 0;
+    gap: 4px;
+    border-right: 1px solid var(--border);
+    flex-shrink: 0;
+  }
+  .nav-item {
+    width: 44px; height: 44px;
+    display: flex; align-items: center; justify-content: center;
+    border-radius: 8px;
+    font-size: 18px;
+    color: var(--fg-secondary);
+    cursor: pointer;
+    transition: all 0.15s;
+    position: relative;
+  }
+  .nav-item.focused {
+    background: var(--accent-dim);
+    color: var(--accent);
+    box-shadow: 0 0 0 2px var(--focus-glow), 0 0 20px rgba(79,195,247,0.3);
+    transform: scale(1.08);
+  }
+  .nav-item.active {
+    background: var(--accent-dim);
+    color: var(--accent);
+  }
+  .nav-item .nav-label {
+    position: absolute; bottom: -2px; font-size: 7px; color: inherit;
+  }
+
+  /* Content Area */
+  .content-area {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+  }
+
+  /* Address Bar */
+  .address-bar {
+    height: 36px;
+    background: var(--bg-surface);
+    display: flex;
+    align-items: center;
+    padding: 0 12px;
+    gap: 8px;
+    border-bottom: 1px solid var(--border);
+  }
+  .address-bar .url-input {
+    flex: 1;
+    background: var(--bg-primary);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    padding: 4px 10px;
+    color: var(--fg-primary);
+    font-size: 11px;
+    height: 26px;
+  }
+  .address-bar .url-input.focused {
+    border-color: var(--accent);
+    box-shadow: 0 0 0 2px var(--focus-glow);
+  }
+  .address-bar .icon-btn {
+    width: 26px; height: 26px;
+    border-radius: 6px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 13px;
+    color: var(--fg-secondary);
+    cursor: pointer;
+  }
+  .address-bar .icon-btn.focused {
+    background: var(--accent-dim);
+    color: var(--accent);
+    box-shadow: 0 0 0 2px var(--focus-glow);
+  }
+
+  /* WebView Content */
+  .webview-content {
+    flex: 1;
+    background: #FFFFFF;
+    color: #333;
+    padding: 12px;
+    font-size: 10px;
+    overflow: hidden;
+    position: relative;
+  }
+  .webview-content.dark-sim {
+    background: var(--bg-secondary);
+    color: var(--fg-primary);
+  }
+  .webview-content h4 { margin-bottom: 8px; color: var(--accent); font-size: 14px; }
+
+  /* Homepage */
+  .homepage {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 24px;
+    background: var(--bg-secondary);
+  }
+  .homepage .logo { font-size: 22px; color: var(--accent); font-weight: bold; }
+  .homepage .search-box {
+    width: 70%;
+    height: 40px;
+    background: var(--bg-surface);
+    border: 2px solid var(--border);
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    padding: 0 16px;
+    font-size: 16px;
+    color: var(--fg-secondary);
+  }
+  .homepage .search-box.focused {
+    border-color: var(--accent);
+    box-shadow: 0 0 0 2px var(--focus-glow), 0 0 24px rgba(79,195,247,0.25);
+  }
+  .homepage .quick-links {
+    display: flex;
+    gap: 16px;
+    margin-top: 8px;
+  }
+  .homepage .quick-link {
+    width: 64px; height: 64px;
+    background: var(--bg-surface);
+    border-radius: 12px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 4px;
+    font-size: 20px;
+    color: var(--fg-secondary);
+  }
+  .homepage .quick-link span { font-size: 8px; }
+  .homepage .quick-link.focused {
+    background: var(--accent-dim);
+    border: 2px solid var(--accent);
+    box-shadow: 0 0 0 2px var(--focus-glow), 0 0 16px rgba(79,195,247,0.3);
+    transform: scale(1.1);
+  }
+
+  /* Focus Flow Diagram */
+  .flow-diagram {
+    background: var(--bg-secondary);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 24px;
+    margin: 16px 0;
+    font-family: monospace;
+    font-size: 13px;
+    line-height: 1.8;
+    white-space: pre;
+    overflow-x: auto;
+    color: var(--fg-primary);
+  }
+  .flow-key { color: var(--accent); font-weight: bold; }
+  .flow-arrow { color: var(--fg-secondary); }
+  .flow-zone { color: var(--success); }
+
+  /* Video Player Overlay */
+  .video-overlay {
+    position: absolute;
+    bottom: 0; left: 0; right: 0;
+    background: linear-gradient(transparent, rgba(0,0,0,0.85));
+    padding: 12px 16px;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+  }
+  .video-controls {
+    display: flex; align-items: center; gap: 12px;
+  }
+  .video-btn {
+    width: 28px; height: 28px; border-radius: 50%;
+    background: var(--bg-surface); color: var(--fg-primary);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 13px;
+  }
+  .video-btn.focused {
+    background: var(--accent);
+    color: var(--bg-primary);
+    box-shadow: 0 0 0 3px var(--focus-glow);
+  }
+  .progress-bar {
+    height: 4px; background: var(--bg-surface); border-radius: 2px;
+    position: relative;
+  }
+  .progress-fill {
+    height: 100%; width: 35%; background: var(--accent); border-radius: 2px;
+  }
+  .time-display { font-size: 9px; color: var(--fg-secondary); }
+
+  /* Bookmark Panel */
+  .panel-overlay {
+    position: absolute;
+    top: 0; left: 72px; right: 0; bottom: 0;
+    background: rgba(0,0,0,0.7);
+    display: flex;
+    align-items: flex-start;
+    justify-content: center;
+    padding-top: 48px;
+    z-index: 5;
+  }
+  .panel {
+    width: 80%;
+    max-height: 70%;
+    background: var(--bg-surface);
+    border-radius: 12px;
+    padding: 20px;
+    border: 1px solid var(--border);
+  }
+  .panel h3 { color: var(--accent); margin-bottom: 16px; font-size: 16px; }
+  .panel-item {
+    display: flex; align-items: center; gap: 8px;
+    padding: 8px 10px;
+    border-radius: 8px;
+    color: var(--fg-primary);
+    font-size: 12px;
+  }
+  .panel-item.focused {
+    background: var(--accent-dim);
+    box-shadow: 0 0 0 2px var(--focus-glow);
+  }
+  .panel-item .panel-icon { font-size: 14px; width: 32px; text-align: center; }
+
+  /* Key Mapping Section */
+  .key-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 12px;
+    margin: 16px 0;
+  }
+  .key-card {
+    background: var(--bg-surface);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 12px 16px;
+  }
+  .key-card .key { 
+    display: inline-block; background: var(--accent-dim); color: var(--accent);
+    padding: 2px 8px; border-radius: 4px; font-family: monospace; font-size: 13px;
+  }
+  .key-card .action { margin-top: 4px; font-size: 13px; color: var(--fg-primary); }
+
+  /* Status bar */
+  .status-bar {
+    height: 20px;
+    background: var(--bg-nav);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 8px;
+    font-size: 9px;
+    color: var(--fg-secondary);
+  }
+
+  /* Legend */
+  .legend {
+    display: flex; gap: 24px; margin: 16px 0; flex-wrap: wrap;
+  }
+  .legend-item { display: flex; align-items: center; gap: 6px; font-size: 13px; }
+  .legend-dot {
+    width: 12px; height: 12px; border-radius: 3px;
+  }
+</style>
+</head>
+<body>
+<div class="page">
+
+<h1>🎬 LazyLines Browser for Projector</h1>
+<p class="subtitle">前端UI设计稿 | NVIDIA Shield TV 2017 Pro + BenQ W1070+ | 2026-05-11</p>
+
+<!-- ==================== Design Tokens ==================== -->
+<h2>1. Design Tokens</h2>
+
+<h3>1.1 暗色主题色彩体系</h3>
+<table>
+  <tr><th>Token</th><th>色值</th><th>用途</th><th>预览</th></tr>
+  <tr><td>--bg-primary</td><td>#0D0D0D</td><td>主背景（Activity/WebView无页面时）</td><td><span class="color-swatch" style="background:#0D0D0D"></span></td></tr>
+  <tr><td>--bg-secondary</td><td>#1A1A1A</td><td>次级背景（首页/面板）</td><td><span class="color-swatch" style="background:#1A1A1A"></span></td></tr>
+  <tr><td>--bg-surface</td><td>#242424</td><td>卡片/输入框/弹窗背景</td><td><span class="color-swatch" style="background:#242424"></span></td></tr>
+  <tr><td>--bg-nav</td><td>#141414</td><td>侧边导航栏背景</td><td><span class="color-swatch" style="background:#141414"></span></td></tr>
+  <tr><td>--fg-primary</td><td>#F0F0F0</td><td>主要文字</td><td><span class="color-swatch" style="background:#F0F0F0"></span></td></tr>
+  <tr><td>--fg-secondary</td><td>#A0A0A0</td><td>次要文字/描述</td><td><span class="color-swatch" style="background:#A0A0A0"></span></td></tr>
+  <tr><td>--accent</td><td>#4FC3F7</td><td>焦点高亮/主按钮/链接</td><td><span class="color-swatch" style="background:#4FC3F7"></span></td></tr>
+  <tr><td>--accent-dim</td><td>#1A5A7A</td><td>焦点背景/选中态</td><td><span class="color-swatch" style="background:#1A5A7A"></span></td></tr>
+  <tr><td>--focus-glow</td><td>#4FC3F7</td><td>焦点光晕（box-shadow）</td><td><span class="color-swatch" style="background:#4FC3F7"></span></td></tr>
+  <tr><td>--danger</td><td>#EF5350</td><td>删除/警告</td><td><span class="color-swatch" style="background:#EF5350"></span></td></tr>
+  <tr><td>--success</td><td>#66BB6A</td><td>完成/成功</td><td><span class="color-swatch" style="background:#66BB6A"></span></td></tr>
+  <tr><td>--border</td><td>#333333</td><td>分割线/边框</td><td><span class="color-swatch" style="background:#333333"></span></td></tr>
+</table>
+
+<h3>1.2 字体梯度</h3>
+<table>
+  <tr><th>层级</th><th>大小</th><th>用途</th></tr>
+  <tr><td>Display</td><td>28sp</td><td>首页Logo/App标题</td></tr>
+  <tr><td>Headline</td><td>20sp</td><td>面板标题</td></tr>
+  <tr><td>Title</td><td>18sp</td><td>导航项标签、设置项标题（最小可阅读字体）</td></tr>
+  <tr><td>Body</td><td>16sp</td><td>正文内容</td></tr>
+  <tr><td>Caption</td><td>13sp</td><td>辅助信息（URL/时间）</td></tr>
+</table>
+
+<h3>1.3 间距系统</h3>
+<table>
+  <tr><th>Token</th><th>值</th><th>用途</th></tr>
+  <tr><td>--space-xs</td><td>4dp</td><td>图标内边距</td></tr>
+  <tr><td>--space-sm</td><td>8dp</td><td>紧凑元素间距</td></tr>
+  <tr><td>--space-md</td><td>12dp</td><td>标准间距</td></tr>
+  <tr><td>--space-lg</td><td>16dp</td><td>卡片/面板内边距</td></tr>
+  <tr><td>--space-xl</td><td>24dp</td><td>区块间距</td></tr>
+  <tr><td>--overscan</td><td>56dp (10%)</td><td>四边安全区（1080p下）</td></tr>
+</table>
+
+<!-- ==================== Screen Mockups ==================== -->
+<h2>2. 页面布局设计</h2>
+
+<div class="legend">
+  <div class="legend-item"><div class="legend-dot" style="background:rgba(255,165,0,0.3); border:1px solid #FFA500;"></div> Overscan 安全区 (10%)</div>
+  <div class="legend-item"><div class="legend-dot" style="background:#4FC3F7;"></div> 当前焦点元素</div>
+  <div class="legend-item"><div class="legend-dot" style="background:#1A5A7A;"></div> 选中/活跃状态</div>
+</div>
+
+<!-- ====== Screen 1: Homepage ====== -->
+<div class="mockup-container">
+  <div>
+    <div class="mockup-label">📸 首页 — 冷启动/导航栏Home</div>
+    <div class="mockup">
+      <div class="tv-frame">
+        <div class="overscan-zone"></div>
+        <div class="overscan-label top">← 10% overscan →</div>
+        <div class="overscan-label bottom">← 10% overscan →</div>
+        <div class="overscan-label left">O</div>
+        <div class="overscan-label right">O</div>
+        <div class="safe-area">
+          <div class="side-nav">
+            <div class="nav-item active" style="font-size:16px;">🏠<br><span class="nav-label">首页</span></div>
+            <div class="nav-item">🔍<br><span class="nav-label">搜索</span></div>
+            <div class="nav-item">⭐<br><span class="nav-label">书签</span></div>
+            <div class="nav-item">▶<br><span class="nav-label">视频</span></div>
+            <div class="nav-item">📥<br><span class="nav-label">下载</span></div>
+            <div class="nav-item">⚙<br><span class="nav-label">设置</span></div>
+          </div>
+          <div class="content-area">
+            <div class="address-bar">
+              <div class="icon-btn focused">🔍</div>
+              <div class="url-input">搜索或输入网址</div>
+              <div class="icon-btn">🛡</div>
+            </div>
+            <div class="homepage">
+              <div class="logo">🌐 LazyLines</div>
+              <div class="search-box focused">🔍 &nbsp;搜索网页或输入网址...</div>
+              <div class="quick-links">
+                <div class="quick-link focused">🌐<span>百度</span></div>
+                <div class="quick-link">📺<span>B站</span></div>
+                <div class="quick-link">📰<span>知乎</span></div>
+                <div class="quick-link">🎬<span>优酷</span></div>
+                <div class="quick-link">📧<span>邮箱</span></div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ====== Screen 2: Browsing ====== -->
+<div class="mockup-container">
+  <div>
+    <div class="mockup-label">📸 浏览中 — 网页加载完成，焦点在内容区</div>
+    <div class="mockup">
+      <div class="tv-frame">
+        <div class="overscan-zone"></div>
+        <div class="safe-area">
+          <div class="side-nav">
+            <div class="nav-item">🏠<br><span class="nav-label">首页</span></div>
+            <div class="nav-item active">🔍<br><span class="nav-label">搜索</span></div>
+            <div class="nav-item">⭐<br><span class="nav-label">书签</span></div>
+            <div class="nav-item">▶<br><span class="nav-label">视频</span></div>
+            <div class="nav-item">📥<br><span class="nav-label">下载</span></div>
+            <div class="nav-item">⚙<br><span class="nav-label">设置</span></div>
+          </div>
+          <div class="content-area">
+            <div class="address-bar">
+              <div class="icon-btn">🔍</div>
+              <div class="url-input">https://www.baidu.com/s?wd=今日新闻</div>
+              <div class="icon-btn focused">🛡</div>
+            </div>
+            <div class="webview-content">
+              <h4>百度搜索 — 今日新闻</h4>
+              <p style="margin-bottom:8px;">📌 今日热点新闻</p>
+              <p style="color:#1a0dab; margin-bottom:4px;">1. 国务院发布最新经济政策...</p>
+              <p style="color:#1a0dab; margin-bottom:4px;">2. 科技创新大会今日召开...</p>
+              <p style="color:#1a0dab; margin-bottom:4px;">3. 国际局势最新动态...</p>
+              <p style="color:#1a0dab; margin-bottom:4px;">4. 体育赛事精彩回顾...</p>
+              <p style="color:#006621; font-size:11px;">www.news.example.com</p>
+              <p style="margin-top:12px;">📌 今日要闻</p>
+              <p style="color:#1a0dab; margin-bottom:4px;">5. 教育改革新方案出台...</p>
+              <p style="color:#1a0dab; margin-bottom:4px;">6. 新能源汽车销量创新高...</p>
+              <div style="position:absolute; right:12px; bottom:12px; background:var(--accent-dim); color:var(--accent); padding:4px 10px; border-radius:4px; font-size:11px;">
+                ▲▼ 滚动页面  ◀▶ 切换导航
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ====== Screen 3: Video Player ====== -->
+<div class="mockup-container">
+  <div>
+    <div class="mockup-label">📸 视频播放 — ExoPlayer全屏，焦点在控制栏</div>
+    <div class="mockup">
+      <div class="tv-frame" style="background:#000;">
+        <div class="overscan-zone"></div>
+        <div style="position:absolute; inset:16px; display:flex; align-items:center; justify-content:center; color:#444; font-size:48px;">
+          🎬
+        </div>
+        <div class="video-overlay">
+          <div class="progress-bar"><div class="progress-fill"></div></div>
+          <div style="display:flex; justify-content:space-between; align-items:center;">
+            <div class="video-controls">
+              <div class="video-btn">⏮</div>
+              <div class="video-btn focused">⏸</div>
+              <div class="video-btn">⏭</div>
+              <div class="time-display">03:24 / 12:35</div>
+            </div>
+            <div class="video-controls">
+              <div class="video-btn">1x</div>
+              <div class="video-btn">⛶</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ====== Screen 4: Bookmark Panel ====== -->
+<div class="mockup-container">
+  <div>
+    <div class="mockup-label">📸 书签面板 — 侧边导航选择书签后弹出</div>
+    <div class="mockup">
+      <div class="tv-frame">
+        <div class="overscan-zone"></div>
+        <div class="safe-area">
+          <div class="side-nav">
+            <div class="nav-item">🏠</div>
+            <div class="nav-item">🔍</div>
+            <div class="nav-item active focused">⭐</div>
+            <div class="nav-item">▶</div>
+            <div class="nav-item">📥</div>
+            <div class="nav-item">⚙</div>
+          </div>
+          <div class="content-area">
+            <div class="address-bar">
+              <div class="icon-btn">🔍</div>
+              <div class="url-input">https://www.baidu.com</div>
+              <div class="icon-btn">🛡</div>
+            </div>
+            <div class="webview-content dark-sim" style="opacity:0.4;"></div>
+            <div class="panel-overlay">
+              <div class="panel">
+                <h3>⭐ 书签</h3>
+                <div class="panel-item focused"><span class="panel-icon">🌐</span>百度 — www.baidu.com</div>
+                <div class="panel-item"><span class="panel-icon">📺</span>哔哩哔哩 — www.bilibili.com</div>
+                <div class="panel-item"><span class="panel-icon">📰</span>知乎 — www.zhihu.com</div>
+                <div class="panel-item"><span class="panel-icon">🎬</span>优酷 — www.youku.com</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ==================== D-pad Focus Flow ==================== -->
+<h2>3. D-pad 焦点路线图</h2>
+
+<div class="flow-diagram">
+<span class="flow-zone">╔══════════════════════════════════════════════════════════════════╗
+║                    双Zone焦点管理架构                            ║
+╠══════════════════════════════════════════════════════════════════╣
+║                                                                  ║
+║  <span class="flow-key">NAV ZONE (侧边栏)</span>              <span class="flow-key">CONTENT ZONE (内容区)</span>         ║
+║  ┌──────────┐                    ┌──────────────────────┐        ║
+║  │ 🏠 首页  │ ◀── <span class="flow-arrow">DPAD_RIGHT</span> ──▶ │  AddressBar           │        ║
+║  │ 🔍 搜索  │                    │  ┌─────────────────┐ │        ║
+║  │ ⭐ 书签  │ ◀── <span class="flow-arrow">DPAD_LEFT</span>  ◀── │  │ WebView内容      │ │        ║
+║  │ ▶ 视频   │                    │  │  (scroll only)  │ │        ║
+║  │ 📥 下载  │                    │  │  ▲ scroll up    │ │        ║
+║  │ ⚙ 设置  │                    │  │  ▼ scroll down  │ │        ║
+║  └──────────┘                    │  └─────────────────┘ │        ║
+║        │ ▲                       └──────────────────────┘        ║
+║        │ <span class="flow-arrow">DPAD_UP</span>                              │              ║
+║        ▼ <span class="flow-arrow">DPAD_DOWN</span>                             │              ║
+║   导航项间跳转                                │              ║
+║                                              │              ║
+╚══════════════════════════════════════════════════════════════════╝</span>
+
+<span class="flow-key">焦点切换规则：</span>
+  1. <span class="flow-arrow">DPAD_LEFT/RIGHT</span> → 在 NAV ZONE ↔ CONTENT ZONE 之间切换
+  2. <span class="flow-arrow">DPAD_UP/DOWN</span>   → 在当前 Zone 内移动焦点
+  3. Content Zone 内，DPAD_UP/DOWN 触发 WebView scroll（每按一次滚 200dp）
+  4. Content Zone 内，只有 AddressBar 是可聚焦原生View
+  5. WebView 内容区域不拦截原生焦点，靠 scroll 浏览
+
+<span class="flow-key">视频播放焦点：</span>
+  进入全屏播放后，焦点锁定在 Video Controls 上
+  ┌─────────────────────────────────────────────┐
+  │  ⏮  →  <span class="flow-key">⏸</span>  →  ⏭  →  1x  →  ⛶     │
+  │  <span class="flow-arrow">DPAD_LEFT/RIGHT</span> 在控制按钮间移动         │
+  │  <span class="flow-arrow">DPAD_CENTER</span>  = 暂停/播放              │
+  │  <span class="flow-arrow">DPAD_LEFT 长按</span> = 倍速快退             │
+  │  <span class="flow-arrow">DPAD_RIGHT 长按</span> = 倍速快进            │
+  │  <span class="flow-arrow">BACK</span> = 退出全屏                     │
+  └─────────────────────────────────────────────┘
+</div>
+
+<!-- ==================== Key Mapping ==================== -->
+<h2>4. 遥控器按键映射</h2>
+
+<h3>4.1 全局按键（任何页面）</h3>
+<div class="key-grid">
+  <div class="key-card"><span class="key">DPAD_UP/DOWN</span><div class="action">当前Zone内移动焦点 / WebView内滚动页面</div></div>
+  <div class="key-card"><span class="key">DPAD_LEFT/RIGHT</span><div class="action">NAV Zone ↔ Content Zone 切换</div></div>
+  <div class="key-card"><span class="key">DPAD_CENTER</span><div class="action">确认/进入/选择当前焦点项</div></div>
+  <div class="key-card"><span class="key">BACK</span><div class="action">返回上级/关闭面板/退出全屏</div></div>
+  <div class="key-card"><span class="key">MENU (长按)</span><div class="action">打开侧边导航栏</div></div>
+  <div class="key-card"><span class="key">HOME (长按)</span><div class="action">回到首页</div></div>
+</div>
+
+<h3>4.2 视频播放按键</h3>
+<div class="key-grid">
+  <div class="key-card"><span class="key">DPAD_CENTER</span><div class="action">播放/暂停</div></div>
+  <div class="key-card"><span class="key">DPAD_LEFT</span><div class="action">快退10秒</div></div>
+  <div class="key-card"><span class="key">DPAD_RIGHT</span><div class="action">快进10秒</div></div>
+  <div class="key-card"><span class="key">DPAD_LEFT 长按</span><div class="action">倍速快退 (2x→4x→8x)</div></div>
+  <div class="key-card"><span class="key">DPAD_RIGHT 长按</span><div class="action">倍速快进 (2x→4x→8x)</div></div>
+  <div class="key-card"><span class="key">BACK</span><div class="action">退出全屏，回到浏览页</div></div>
+</div>
+
+<!-- ==================== Overscan ==================== -->
+<h2>5. Overscan 安全区设计</h2>
+
+<table>
+  <tr><th>参数</th><th>值</th><th>说明</th></tr>
+  <tr><td>默认安全区比例</td><td>10%（每边）</td><td>1080p下每边约54px，总计108px</td></tr>
+  <tr><td>实现方式</td><td>Activity根布局 setPadding()</td><td>所有子View自动在安全区内</td></tr>
+  <tr><td>可配置</td><td>Settings → 安全区调整</td><td>5%/10%/15% 三档可选</td></tr>
+  <tr><td>调试模式</td><td>橙色半透明边框</td><td>Settings中可开启overscan辅助线</td></tr>
+</table>
+
+<!-- ==================== Projection Adaptation ==================== -->
+<h2>6. 投影仪适配</h2>
+
+<h3>6.1 DLP 投影色彩补偿</h3>
+<table>
+  <tr><th>问题</th><th>补偿策略</th></tr>
+  <tr><td>DLP色域偏窄，蓝色偏暗</td><td>焦点高亮色使用 #4FC3F7（偏亮蓝），避免深蓝</td></tr>
+  <tr><td>暗部细节丢失</td><td>背景色不低于 #0D0D0D，前景不低于 #F0F0F0，对比度 >10:1</td></tr>
+  <tr><td>彩虹效应（单DLP轮）</td><td>减少大面积纯白闪烁，过渡用渐变</td></tr>
+  <tr><td>33ms 输入延迟</td><td>焦点切换动画 ≤100ms，避免长动画造成"拖影感"</td></tr>
+</table>
+
+<h3>6.2 投影阅读模式</h3>
+<table>
+  <tr><th>参数</th><th>值</th><th>说明</th></tr>
+  <tr><td>WebView textZoom</td><td>130</td><td>比默认大30%，3米投影距离可阅读</td></tr>
+  <tr><td>全局最小字体</td><td>18sp</td><td>所有原生UI文字不小于此值</td></tr>
+  <tr><td>焦点指示器</td><td>3dp光晕 + scale 1.08</td><td>3层视觉反馈：边框+光晕+缩放</td></tr>
+  <tr><td>行间距</td><td>1.5x</td><td>原生列表项增加行高</td></tr>
+</table>
+
+<!-- ==================== Interaction Flow ==================== -->
+<h2>7. 核心交互流程</h2>
+
+<h3>7.1 冷启动流程</h3>
+<div class="flow-diagram">
+TV Launcher 点击 LazyLines 图标
+  → <span class="flow-key">TVMainActivity.onCreate()</span>
+  → 设置 overscan padding
+  → 应用暗色主题
+  → WebView scale fix
+  → 加载首页 (file:///android_asset/homepage.html)
+  → 焦点自动落在首页搜索框
+  → 用户 D-pad 操作开始
+</div>
+
+<h3>7.2 搜索流程</h3>
+<div class="flow-diagram">
+D-pad 聚焦搜索框 → <span class="flow-key">DPAD_CENTER</span> 打开系统输入法
+  → 输入关键词 → 确认提交
+  → <span class="flow-key">UrlBarHandler.processInput()</span>
+  → 判断 URL vs 搜索关键词
+  → WebView 加载结果页面
+  → 焦点自动回到 Content Zone
+  → ▲▼ 滚动浏览结果
+</div>
+
+<h3>7.3 视频检测流程</h3>
+<div class="flow-diagram">
+页面加载完成 → <span class="flow-key">VideoDetector JS</span> 注入
+  → 扫描 &lt;video&gt;/&lt;source&gt;/&lt;iframe&gt;
+  → MutationObserver 监听动态内容
+  → 检测到视频 → 右下角弹出 <span class="flow-key">▶ 播放</span> 按钮
+  → <span class="flow-key">DPAD_CENTER</span> → ExoPlayer 全屏播放
+  → 遥控器控制播放
+  → <span class="flow-key">BACK</span> → 退出全屏回到浏览
+</div>
+
+</div>
+</body>
+</html>

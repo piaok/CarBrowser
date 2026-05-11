@@ -1,0 +1,105 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- ===== LazyLines TV Dark Theme (Projector) ===== -->
+
+    <!-- Main TV Activity theme: dark, no action bar, fullscreen -->
+    <style name="Theme.LazyLines.TV" parent="Theme.MaterialComponents.NoActionBar">
+        <!-- Core colors -->
+        <item name="colorPrimary">#4FC3F7</item>
+        <item name="colorPrimaryDark">#1A5A7A</item>
+        <item name="colorAccent">#4FC3F7</item>
+        <item name="android:colorBackground">#0D0D0D</item>
+        <item name="android:colorForeground">#F0F0F0</item>
+        <item name="android:windowBackground">#0D0D0D</item>
+
+        <!-- Window chrome -->
+        <item name="android:windowFullscreen">true</item>
+        <item name="android:windowNoTitle">true</item>
+        <item name="android:windowContentOverlay">@null</item>
+        <item name="android:statusBarColor">#000000</item>
+        <item name="android:navigationBarColor">#000000</item>
+
+        <!-- Text appearance -->
+        <item name="android:textColorPrimary">#F0F0F0</item>
+        <item name="android:textColorSecondary">#A0A0A0</item>
+        <item name="android:textColorHint">#666666</item>
+
+        <!-- Default button style for D-pad -->
+        <item name="buttonStyle">@style/Widget.LazyLines.TV.Button</item>
+        <item name="imageButtonStyle">@style/Widget.LazyLines.TV.ImageButton</item>
+        <item name="editTextStyle">@style/Widget.LazyLines.TV.EditText</item>
+        <item name="alertDialogTheme">@style/Theme.LazyLines.TV.Dialog</item>
+    </style>
+
+    <!-- Fullscreen video playback theme -->
+    <style name="Theme.LazyLines.TV.Fullscreen" parent="Theme.MaterialComponents.NoActionBar">
+        <item name="android:windowFullscreen">true</item>
+        <item name="android:windowNoTitle">true</item>
+        <item name="android:windowContentOverlay">@null</item>
+        <item name="android:windowBackground">#000000</item>
+        <item name="android:statusBarColor">#000000</item>
+        <item name="android:navigationBarColor">#000000</item>
+    </style>
+
+    <!-- Dialog theme (dark) -->
+    <style name="Theme.LazyLines.TV.Dialog" parent="Theme.MaterialComponents.Dialog.Alert">
+        <item name="android:windowBackground">#242424</item>
+        <item name="android:textColorPrimary">#F0F0F0</item>
+        <item name="android:textColorSecondary">#A0A0A0</item>
+        <item name="colorAccent">#4FC3F7</item>
+        <item name="buttonBarPositiveButtonStyle">@style/Widget.LazyLines.TV.Button</item>
+        <item name="buttonBarNegativeButtonStyle">@style/Widget.LazyLines.TV.Button</item>
+    </style>
+
+    <!-- Button style with D-pad focus indicator -->
+    <style name="Widget.LazyLines.TV.Button" parent="Widget.MaterialComponents.Button.TextButton">
+        <item name="android:textColor">#F0F0F0</item>
+        <item name="android:textSize">16sp</item>
+        <item name="android:minHeight">48dp</item>
+        <item name="android:minWidth">88dp</item>
+        <item name="android:backgroundTint">#242424</item>
+        <item name="android:focusable">true</item>
+        <item name="android:focusableInTouchMode">true</item>
+    </style>
+
+    <!-- ImageButton style with D-pad focus indicator -->
+    <style name="Widget.LazyLines.TV.ImageButton" parent="Widget.MaterialComponents.ImageButton">
+        <item name="android:focusable">true</item>
+        <item name="android:focusableInTouchMode">true</item>
+        <item name="android:background">@drawable/tv_focusable_bg</item>
+    </style>
+
+    <!-- EditText style for TV address bar -->
+    <style name="Widget.LazyLines.TV.EditText" parent="Widget.MaterialComponents.EditText">
+        <item name="android:textColor">#F0F0F0</item>
+        <item name="android:textColorHint">#666666</item>
+        <item name="android:textSize">16sp</item>
+        <item name="android:focusable">true</item>
+        <item name="android:focusableInTouchMode">true</item>
+        <item name="android:background">@drawable/tv_focusable_bg</item>
+    </style>
+
+    <!-- Side nav item style -->
+    <style name="TVNavItem">
+        <item name="android:layout_width">56dp</item>
+        <item name="android:layout_height">56dp</item>
+        <item name="android:focusable">true</item>
+        <item name="android:focusableInTouchMode">true</item>
+        <item name="android:background">@drawable/tv_nav_item_bg</item>
+        <item name="android:gravity">center</item>
+    </style>
+
+    <!-- Panel item style (bookmarks, settings) -->
+    <style name="TVPanelItem">
+        <item name="android:layout_width">match_parent</item>
+        <item name="android:layout_height">52dp</item>
+        <item name="android:focusable">true</item>
+        <item name="android:focusableInTouchMode">true</item>
+        <item name="android:background">@drawable/tv_focusable_bg</item>
+        <item name="android:paddingStart">16dp</item>
+        <item name="android:paddingEnd">16dp</item>
+        <item name="android:gravity">center_vertical</item>
+        <item name="android:textColor">#F0F0F0</item>
+        <item name="android:textSize">18sp</item>
+    </style>
+</resources>

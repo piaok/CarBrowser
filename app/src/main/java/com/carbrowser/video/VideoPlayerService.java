@@ -100,6 +100,22 @@ public class VideoPlayerService {
     }
 
     /**
+     * Set playback speed directly (used by TV D-pad controls).
+     */
+    public void setSpeed(float speed) {
+        if (player != null) {
+            player.setPlaybackParameters(new PlaybackParameters(speed));
+        }
+        // Try to find matching index
+        for (int i = 0; i < SPEED_OPTIONS.length; i++) {
+            if (Math.abs(SPEED_OPTIONS[i] - speed) < 0.01f) {
+                currentSpeedIndex = i;
+                break;
+            }
+        }
+    }
+
+    /**
      * Check if overlay permission is granted (required for API 23+).
      */
     public boolean canDrawOverlays() {
