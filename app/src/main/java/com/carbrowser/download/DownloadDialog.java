@@ -177,7 +177,7 @@ public class DownloadDialog {
             sizeView.setText(task.getFormattedDownloaded() + " / " + task.getFormattedSize()
                 + (progressText.isEmpty() ? "" : "  " + progressText));
         } else if (task.status == DownloadTask.STATUS_COMPLETE) {
-            sizeView.setText(task.getFormattedSize() + "  ✓");
+            sizeView.setText(task.getFormattedSize() + "  ✓  " + new java.io.File(task.filePath).getParent());
         } else if (task.status == DownloadTask.STATUS_FAILED) {
             sizeView.setText(task.error != null ? "错误: " + task.error : "下载失败");
         }

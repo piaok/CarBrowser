@@ -80,13 +80,41 @@ public class DownloadManager {
     }
 
     /**
-     * Get the default download directory.
+     * Get the download directory.
+     * Strategy:
+     * 1. Try public Downloads/CarBrowser (works on API < 30 with WRITE_EXTERNAL_STORAGE)
+     * 2. Fall back to app-specific external storage (always works, scoped storage safe)
      */
     public File getDownloadDir() {
-        File dir = new File(android.os.Environment.getExternalStoragePublicDirectory(
+        // Strategy 1: Public Downloads directory
+        File publicDir = new File(android.os.Environment.getExternalStoragePublicDirectory(
             android.os.Environment.DIRECTORY_DOWNLOADS), "CarBrowser");
-        if (!dir.exists()) dir.mkdirs();
-        return dir;
+        if (publicDir.exists() || publicDir.mkdirs()) {
+            // Verify it's actually writable
+            File testFile = new File(publicDir, ".write_test_" + System.currentTimeMillis());
+            try {
+                if (testFile.createNewFile()) {
+                    testFile.delete();
+                    return publicDir;
+                }
+            } catch (Exception e) {
+                Log.w(TAG, "Public download dir not writable: " + e.getMessage());
+            }
+        }
+
+        // Strategy 2: App-specific external files dir (always works, scoped storage safe)
+        // This is visible to file managers on Android 11+ via MediaStore
+        File appDir = context.getExternalFilesDir(android.os.Environment.DIRECTORY_DOWNLOADS);
+        if (appDir != null) {
+            if (!appDir.exists()) appDir.mkdirs();
+            Log.i(TAG, "Using app-specific download dir: " + appDir.getAbsolutePath());
+            return appDir;
+        }
+
+        // Strategy 3: Internal storage (last resort)
+        File internalDir = new File(context.getFilesDir(), "downloads");
+        if (!internalDir.exists()) internalDir.mkdirs();
+        return internalDir;
     }
 
     /**
