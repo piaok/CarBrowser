@@ -2,9 +2,9 @@ name: Build LazyLines APK
 
 on:
   push:
-    branches: [ projector, main ]
+    branches: [ projector, lazylines-projector, main, master ]
   pull_request:
-    branches: [ projector, main ]
+    branches: [ projector, main, master ]
 
 jobs:
   build:
