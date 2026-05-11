@@ -56,10 +56,10 @@
                 android:layout_marginTop="4dp" />
 
             <ImageButton
-                android:id="@+id/nav_download"
+                android:id="@+id/nav_tabs"
                 style="@style/TVNavItem"
                 android:src="@drawable/ic_download"
-                android:contentDescription="下载管理"
+                android:contentDescription="标签页"
                 android:layout_marginTop="4dp" />
 
             <!-- Spacer -->

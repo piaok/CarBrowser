@@ -40,8 +40,6 @@ public class VideoActivity extends AppCompatActivity {
     private TextView speedLabel;
 
     // Long-press tracking for speed seek
-    private boolean isLongPressLeft = false;
-    private boolean isLongPressRight = false;
     private int speedIndex = 0;
 
     @Override
@@ -50,7 +48,8 @@ public class VideoActivity extends AppCompatActivity {
 
         getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
 
-        // Always fullscreen on TV
+        // Fullscreen on TV (always true for projector, but read intent extra for consistency)
+        boolean isFullscreen = getIntent().getBooleanExtra("fullscreen", true);
         getWindow().getDecorView().setSystemUiVisibility(
             View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY
             | View.SYSTEM_UI_FLAG_FULLSCREEN
@@ -90,47 +89,51 @@ public class VideoActivity extends AppCompatActivity {
 
     @Override
     public boolean onKeyDown(int keyCode, KeyEvent event) {
+        // Ignore key repeat (long press generates repeated onKeyDown calls)
+        if (event.getRepeatCount() > 0) {
+            // On repeat: handle speed change
+            if (keyCode == KeyEvent.KEYCODE_DPAD_LEFT) {
+                if (player != null) {
+                    float currentSpeed = SPEED_STEPS[speedIndex];
+                    // Decrease speed on left repeat
+                    if (speedIndex > 0) {
+                        speedIndex--;
+                    } else {
+                        speedIndex = 0; // Stay at 1x minimum
+                    }
+                    setSpeed(speedIndex);
+                }
+                return true;
+            }
+            if (keyCode == KeyEvent.KEYCODE_DPAD_RIGHT) {
+                cycleSpeed();
+                return true;
+            }
+            return true; // Consume repeated center/back events
+        }
+
         switch (keyCode) {
             case KeyEvent.KEYCODE_DPAD_CENTER:
-                // Toggle play/pause
                 if (player != null) {
                     player.setPlayWhenReady(!player.getPlayWhenReady());
                 }
                 return true;
 
             case KeyEvent.KEYCODE_DPAD_LEFT:
-                if (event.isLongPress()) {
-                    // Long press left: speed rewind
-                    isLongPressLeft = true;
-                    setSpeed(0); // Reset to 1x first, then cycle down
-                    return true;
-                }
-                if (!isLongPressLeft && player != null) {
-                    // Short press: rewind 10s
+                // Short press: seek back 10s
+                if (player != null) {
                     long pos = player.getCurrentPosition() - SEEK_STEP_MS;
                     player.seekTo(Math.max(0, pos));
-                    return true;
                 }
                 return true;
 
             case KeyEvent.KEYCODE_DPAD_RIGHT:
-                if (event.isLongPress()) {
-                    // Long press right: speed forward
-                    isLongPressRight = true;
-                    cycleSpeed();
-                    return true;
-                }
-                if (!isLongPressRight && player != null) {
-                    // Short press: forward 10s
+                // Short press: seek forward 10s
+                if (player != null) {
                     long pos = player.getCurrentPosition() + SEEK_STEP_MS;
                     long dur = player.getDuration();
                     player.seekTo(dur > 0 ? Math.min(pos, dur) : pos);
-                    return true;
                 }
-                return true;
-
-            case KeyEvent.KEYCODE_BACK:
-                finish();
                 return true;
         }
         return super.onKeyDown(keyCode, event);
@@ -138,12 +141,12 @@ public class VideoActivity extends AppCompatActivity {
 
     @Override
     public boolean onKeyUp(int keyCode, KeyEvent event) {
-        if (keyCode == KeyEvent.KEYCODE_DPAD_LEFT) {
-            isLongPressLeft = false;
-            return true;
-        }
-        if (keyCode == KeyEvent.KEYCODE_DPAD_RIGHT) {
-            isLongPressRight = false;
+        // When key is released after speed change, reset to 1x
+        if (keyCode == KeyEvent.KEYCODE_DPAD_LEFT || keyCode == KeyEvent.KEYCODE_DPAD_RIGHT) {
+            if (speedIndex != 0) {
+                speedIndex = 0;
+                setSpeed(0); // Reset to 1x
+            }
             return true;
         }
         return super.onKeyUp(keyCode, event);
@@ -168,13 +171,18 @@ public class VideoActivity extends AppCompatActivity {
     @Override
     protected void onPause() {
         super.onPause();
-        if (player != null) player.setPlayWhenReady(false);
+        if (player != null) {
+            wasUserPaused = !player.getPlayWhenReady();
+            player.setPlayWhenReady(false);
+        }
     }
 
     @Override
     protected void onResume() {
         super.onResume();
-        if (player != null) player.setPlayWhenReady(true);
+        if (player != null && !wasUserPaused) {
+            player.setPlayWhenReady(true);
+        }
     }
 
     @Override

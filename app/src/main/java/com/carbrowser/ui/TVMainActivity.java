@@ -66,13 +66,13 @@ public class TVMainActivity extends AppCompatActivity
     private ImageButton navSearch;
     private ImageButton navBookmark;
     private ImageButton navVideo;
-    private ImageButton navDownload;
+    private ImageButton navTabs;
     private ImageButton navSettings;
 
     // Services
     private TabManager tabManager;
-    private VideoDetector videoDetector;
-    private VideoPlayerService videoPlayerService;
+    // VideoDetector created per-tab in createTab() to avoid callback override
+    // VideoPlayerService removed - VideoActivity creates its own instance
     private DownloadManager downloadManager;
     private MemoryOptimizer memoryOptimizer;
     private BookmarkDao bookmarkDao;
@@ -135,7 +135,7 @@ public class TVMainActivity extends AppCompatActivity
         navSearch = findViewById(R.id.nav_search);
         navBookmark = findViewById(R.id.nav_bookmark);
         navVideo = findViewById(R.id.nav_video);
-        navDownload = findViewById(R.id.nav_download);
+        navTabs = findViewById(R.id.nav_tabs);
         navSettings = findViewById(R.id.nav_settings);
 
         // URL bar submit
@@ -190,9 +190,9 @@ public class TVMainActivity extends AppCompatActivity
             showVideoToolsPanel();
         });
 
-        navDownload.setOnClickListener(v -> {
-            setActiveNav(navDownload);
-            DownloadDialog.showDownloadList(this, downloadManager);
+        navTabs.setOnClickListener(v -> {
+            setActiveNav(navTabs);
+            showTabPanel();
         });
 
         navSettings.setOnClickListener(v -> {
@@ -225,8 +225,6 @@ public class TVMainActivity extends AppCompatActivity
         tabManager = new TabManager(tabContainer);
         tabManager.setTabListener(this);
 
-        videoDetector = new VideoDetector();
-        videoPlayerService = new VideoPlayerService(this);
 
         downloadManager = new DownloadManager(this);
 
@@ -336,7 +334,7 @@ public class TVMainActivity extends AppCompatActivity
         navSearch.setActivated(false);
         navBookmark.setActivated(false);
         navVideo.setActivated(false);
-        navDownload.setActivated(false);
+        navTabs.setActivated(false);
         navSettings.setActivated(false);
         // Set active
         activeBtn.setActivated(true);
@@ -390,10 +388,34 @@ public class TVMainActivity extends AppCompatActivity
             }
         });
 
-        // Inject video detector
-        container.getWebView().addJavascriptInterface(videoDetector, "VideoDetector");
+        // Inject video detector (per-tab instance to avoid callback override)
+        VideoDetector detector = new VideoDetector();
+        container.getWebView().addJavascriptInterface(detector, "VideoDetector");
 
-        videoDetector.setCallback(new VideoDetector.VideoCallback() {
+        // Inject CarBridge for homepage interaction
+        com.carbrowser.home.CarBridge carBridge = new com.carbrowser.home.CarBridge(this);
+        carBridge.setCallback(new com.carbrowser.home.CarBridge.BridgeCallback() {
+            @Override public void openUrl(String url) {
+                runOnUiThread(() -> {
+                    WebViewContainer tab = tabManager.getActiveTab();
+                    if (tab != null) tab.loadUrl(url);
+                });
+            }
+            @Override public String getQuickLinks() { return carBridge.getQuickLinks(); }
+            @Override public void saveQuickLinks(String json) { }
+            @Override public String getSearchEngine() {
+                return getSharedPreferences(PREFS_NAME, MODE_PRIVATE)
+                    .getString(KEY_SEARCH_ENGINE, "baidu");
+            }
+            @Override public boolean isAdBlockEnabled() {
+                App app = App.getInstance();
+                return app != null && app.getAdBlocker() != null && app.getAdBlocker().isEnabled();
+            }
+        });
+        container.getWebView().addJavascriptInterface(carBridge, "CarBridge");
+
+
+        detector.setCallback(new VideoDetector.VideoCallback() {
             @Override public void onVideoFound(String[] videoUrls) {
                 runOnUiThread(() -> {
                     detectedVideoUrls.clear();
@@ -432,11 +454,42 @@ public class TVMainActivity extends AppCompatActivity
 
     // --- Panels ---
 
+
+    private void showTabPanel() {
+        panelTitle.setText("📑 标签页 (" + tabManager.getTabCount() + "/" + TabManager.MAX_TABS + ")");
+        panelContent.removeAllViews();
+
+        String[] titles = tabManager.getTabTitles();
+        for (int i = 0; i < titles.length; i++) {
+            final int tabIndex = i;
+            String title = titles[i];
+            if (title == null || title.isEmpty()) title = "标签 " + (i + 1);
+            addPanelItem((i == tabManager.getActiveTabIndex() ? "● " : "○ ") + title, v -> {
+                closePanel();
+                tabManager.switchToTab(tabIndex);
+            });
+        }
+        addPanelItem("+ 新建标签页", v -> {
+            closePanel();
+            int idx = tabManager.newTab(TVMainActivity.this,
+                "file:///android_asset/homepage.html");
+            if (idx == -1) {
+                Toast.makeText(TVMainActivity.this, "最多 " + TabManager.MAX_TABS + " 个标签页",
+                    Toast.LENGTH_SHORT).show();
+            }
+        });
+        addPanelItem("✕ 关闭当前标签", v -> {
+            closePanel();
+            tabManager.closeTab(tabManager.getActiveTabIndex());
+        });
+        openPanel();
+    }
+
     private void showBookmarkPanel() {
         panelTitle.setText("⭐ 书签");
         panelContent.removeAllViews();
 
-        java.util.List<String[]> bookmarks = bookmarkDao.getAllBookmarks();
+        java.util.List<BookmarkDao.Bookmark> bookmarks = bookmarkDao.getAllBookmarks();
         if (bookmarks.isEmpty()) {
             TextView empty = new TextView(this);
             empty.setText("暂无书签");
@@ -445,19 +498,19 @@ public class TVMainActivity extends AppCompatActivity
             empty.setPadding(16, 24, 16, 24);
             panelContent.addView(empty);
         } else {
-            for (String[] bm : bookmarks) {
+            for (BookmarkDao.Bookmark bm : bookmarks) {
                 TextView item = new TextView(this);
-                item.setText(bm[0] + "\n" + bm[1]);
+                item.setText(bm.title + "\n" + bm.url);
                 item.setTextColor(0xFFF0F0F0);
                 item.setTextSize(16);
                 item.setPadding(16, 12, 16, 12);
-                item.setBackground(getResources().getDrawable(R.drawable.tv_panel_item_bg));
+                item.setBackground(androidx.core.content.ContextCompat.getDrawable(this, R.drawable.tv_panel_item_bg));
                 item.setFocusable(true);
                 item.setFocusableInTouchMode(true);
                 item.setOnClickListener(v -> {
                     closePanel();
                     WebViewContainer tab = tabManager.getActiveTab();
-                    if (tab != null) tab.loadUrl(bm[1]);
+                    if (tab != null) tab.loadUrl(bm.url);
                 });
                 panelContent.addView(item);
             }
@@ -490,7 +543,7 @@ public class TVMainActivity extends AppCompatActivity
             final String videoUrl = url;
             addPanelItem("▶ " + label, v -> {
                 closePanel();
-                videoPlayerService.playInActivity(videoUrl, true);
+                com.carbrowser.video.VideoPlayerService.startVideoActivity(TVMainActivity.this, videoUrl, true);
             });
         }
         openPanel();
@@ -533,7 +586,7 @@ public class TVMainActivity extends AppCompatActivity
         item.setTextColor(0xFFF0F0F0);
         item.setTextSize(18);
         item.setPadding(16, 14, 16, 14);
-        item.setBackground(getResources().getDrawable(R.drawable.tv_panel_item_bg));
+        item.setBackground(androidx.core.content.ContextCompat.getDrawable(this, R.drawable.tv_panel_item_bg));
         item.setFocusable(true);
         item.setFocusableInTouchMode(true);
         item.setOnClickListener(clickListener);
@@ -615,7 +668,7 @@ public class TVMainActivity extends AppCompatActivity
             .setPositiveButton("播放", (dialog, which) -> {
                 String url = input.getText().toString().trim();
                 if (!url.isEmpty()) {
-                    videoPlayerService.playInActivity(url, true);
+                    com.carbrowser.video.VideoPlayerService.startVideoActivity(TVMainActivity.this, url, true);
                 }
             })
             .setNegativeButton("取消", null)
@@ -748,7 +801,6 @@ public class TVMainActivity extends AppCompatActivity
             memoryOptimizer.unregister(this);
         }
         tabManager.destroyAll();
-        videoPlayerService.releasePlayer();
         if (downloadManager != null) {
             downloadManager.shutdown();
         }

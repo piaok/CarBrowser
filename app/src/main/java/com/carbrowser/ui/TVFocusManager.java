@@ -155,14 +155,16 @@ public class TVFocusManager {
     private void scrollWebView(boolean up) {
         if (tabContainer.getChildCount() == 0) return;
         View tab = tabContainer.getChildAt(0);
-        if (tab instanceof ViewGroup) {
-            ViewGroup tabView = (ViewGroup) tab;
-            // Find WebView inside the tab
-            android.webkit.WebView webView = findWebView(tabView);
-            if (webView != null) {
-                int scroll = up ? -scrollStepPx : scrollStepPx;
-                webView.scrollBy(0, scroll);
-            }
+        android.webkit.WebView webView = null;
+        // The tab could be a WebView directly or a ViewGroup containing one
+        if (tab instanceof android.webkit.WebView) {
+            webView = (android.webkit.WebView) tab;
+        } else if (tab instanceof ViewGroup) {
+            webView = findWebView((ViewGroup) tab);
+        }
+        if (webView != null) {
+            int scroll = up ? -scrollStepPx : scrollStepPx;
+            webView.scrollBy(0, scroll);
         }
     }
 
