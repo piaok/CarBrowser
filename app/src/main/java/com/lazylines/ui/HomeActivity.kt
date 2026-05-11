@@ -4,6 +4,7 @@ import android.app.AlertDialog
 import android.os.Bundle
 import android.view.KeyEvent
 import android.view.View
+import android.view.ViewGroup
 import android.view.WindowManager
 import android.webkit.WebChromeClient
 import android.webkit.WebSettings
@@ -42,9 +43,9 @@ class HomeActivity : AppCompatActivity() {
         val root = SafeAreaFrameLayout(this)
         webView = WebView(this)
         webView.id = View.generateViewId()
-        val lp = SafeAreaFrameLayout.LayoutParams(
-            SafeAreaFrameLayout.LayoutParams.MATCH_PARENT,
-            SafeAreaFrameLayout.LayoutParams.MATCH_PARENT
+        val lp = ViewGroup.LayoutParams(
+            ViewGroup.LayoutParams.MATCH_PARENT,
+            ViewGroup.LayoutParams.MATCH_PARENT
         )
         root.addView(webView, lp)
         setContentView(root)

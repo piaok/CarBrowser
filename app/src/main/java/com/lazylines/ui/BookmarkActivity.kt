@@ -2,7 +2,9 @@ package com.lazylines.ui
 
 import android.content.Intent
 import android.os.Bundle
+import android.view.View
 import android.widget.*
+import android.widget.LinearLayout.*
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import com.lazylines.leanback.SafeAreaScrollView
