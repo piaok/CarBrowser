@@ -98,7 +98,7 @@ class BrowserActivity : AppCompatActivity() {
         // Register sidebar focus chain
         focusManager.registerFocusChain(
             listOf(btnHome, btnBack, btnForward, btnRefresh, btnDownload),
-            LeanbackFocusManager.FocusDirection.VERTICAL
+            View.FOCUS_DOWN
         )
     }
 

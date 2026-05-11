@@ -2,7 +2,6 @@ package com.lazylines.core
 
 import android.annotation.SuppressLint
 import android.content.Context
-import android.content.Intent
 import android.graphics.Bitmap
 import android.net.http.SslError
 import android.os.Handler
@@ -142,7 +141,9 @@ class LazyWebView @JvmOverloads constructor(
         stopLoading()
         clearCache(true)
         clearHistory()
-        freeMemory()
+        // freeMemory() removed in API 33+, use GC hint instead
+        @Suppress("DEPRECATION")
+        try { freeMemory() } catch (_: NoSuchMethodError) { System.gc() }
     }
 
     override fun onDetachedFromWindow() {

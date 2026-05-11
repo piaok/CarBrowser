@@ -1,20 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <!-- ═══════════════════════════════════════════════════════════════
-         LazyLines Projector Theme
-         ═══════════════════════════════════════════════════════════════ -->
-    <style name="LazyLinesTheme" parent="Theme.MaterialComponents.NoActionBar">
-        <item name="colorPrimary">@color/accent</item>
-        <item name="colorPrimaryDark">@color/bg_primary</item>
-        <item name="colorAccent">@color/accent</item>
-        <item name="android:windowBackground">@color/bg_primary</item>
-        <item name="android:statusBarColor">@color/bg_primary</item>
-        <item name="android:navigationBarColor">@color/bg_primary</item>
-        <item name="android:windowFullscreen">true</item>
-        <item name="android:windowContentOverlay">@null</item>
-    </style>
-
-    <!-- ═══════════════════════════════════════════════════════════════
          Focus Indicator
          ═══════════════════════════════════════════════════════════════ -->
     <style name="FocusIndicator">

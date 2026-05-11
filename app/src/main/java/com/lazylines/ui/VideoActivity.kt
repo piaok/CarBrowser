@@ -12,6 +12,7 @@ import android.widget.LinearLayout
 import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
 import com.google.android.exoplayer2.ui.PlayerView
+import com.lazylines.R
 import com.lazylines.video.VideoPlayerService
 
 /**
@@ -36,7 +37,7 @@ class VideoActivity : AppCompatActivity() {
     private lateinit var btnSpeed: TextView
     private lateinit var btnExit: ImageButton
 
-    private val videoService = VideoPlayerService(this)
+    private lateinit var videoService: VideoPlayerService
     private val autoHideHandler = Handler(Looper.getMainLooper())
     private var controlsVisible = false
 
@@ -68,6 +69,8 @@ class VideoActivity : AppCompatActivity() {
         )
 
         setContentView(R.layout.activity_video)
+
+        videoService = VideoPlayerService(this)
 
         initViews()
         initPlayer()
