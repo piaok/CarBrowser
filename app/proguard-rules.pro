@@ -3,7 +3,7 @@
 -keep interface com.google.android.exoplayer2.** { *; }
 
 # WebView JS Bridge
--keepclassmembers class com.carbrowser.** {
+-keepclassmembers class com.lazylines.** {
     @android.webkit.JavascriptInterface <methods>;
 }
--keep class com.carbrowser.** { *; }
+-keep class com.lazylines.** { *; }

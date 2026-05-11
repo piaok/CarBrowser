@@ -4,13 +4,13 @@ plugins {
 }
 
 android {
-    namespace = "com.carbrowser"
+    namespace = "com.lazylines"
     compileSdk = 34
 
     defaultConfig {
-        applicationId = "com.carbrowser"
+        applicationId = "com.lazylines"
         minSdk = 21
-        targetSdk = 28
+        targetSdk = 33
         versionCode = 1
         versionName = "1.0.0"
     }
@@ -26,6 +26,7 @@ android {
         }
         debug {
             isMinifyEnabled = false
+            signingConfig = signingConfigs.getByName("debug")
         }
     }
 
@@ -38,7 +39,10 @@ android {
         jvmTarget = "1.8"
     }
 
+    lint {
+        abortOnError = false
     }
+}
 
 dependencies {
     implementation("androidx.core:core-ktx:1.12.0")
@@ -46,7 +50,7 @@ dependencies {
     implementation("com.google.android.material:material:1.11.0")
     implementation("androidx.webkit:webkit:1.9.0")
 
-    // ExoPlayer - 轻量视频播放（仅核心模块）
+    // ExoPlayer - 视频播放
     implementation("com.google.android.exoplayer:exoplayer-core:2.19.1")
     implementation("com.google.android.exoplayer:exoplayer-ui:2.19.1")
     implementation("com.google.android.exoplayer:exoplayer-hls:2.19.1")

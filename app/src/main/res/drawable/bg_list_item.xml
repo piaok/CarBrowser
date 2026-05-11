@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="utf-8"?>
+<selector xmlns:android="http://schemas.android.com/apk/res/android">
+    <!-- Focused: elevated background with left 3dp cyan border -->
+    <item android:state_focused="true">
+        <layer-list>
+            <!-- Left accent bar -->
+            <item>
+                <shape android:shape="rectangle">
+                    <solid android:color="@color/focus_border" />
+                    <corners android:radius="@dimen/card_radius" />
+                </shape>
+            </item>
+            <!-- Inner fill: inset left by 3dp to reveal the accent bar -->
+            <item
+                android:left="@dimen/focus_border_width"
+                android:top="0dp"
+                android:right="0dp"
+                android:bottom="0dp">
+                <shape android:shape="rectangle">
+                    <solid android:color="@color/bg_elevated" />
+                    <corners
+                        android:topRightRadius="@dimen/card_radius"
+                        android:bottomRightRadius="@dimen/card_radius" />
+                </shape>
+            </item>
+        </layer-list>
+    </item>
+
+    <!-- Default: secondary background -->
+    <item>
+        <shape android:shape="rectangle">
+            <solid android:color="@color/bg_secondary" />
+            <corners android:radius="@dimen/card_radius" />
+        </shape>
+    </item>
+</selector>

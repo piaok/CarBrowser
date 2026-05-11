@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="utf-8"?>
+<com.lazylines.leanback.SafeAreaFrameLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/bg_primary">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:orientation="vertical"
+        android:padding="@dimen/space_md">
+
+        <!-- Title -->
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Bookmarks"
+            android:textColor="@color/text_primary"
+            android:textSize="@dimen/text_headline"
+            android:paddingBottom="@dimen/space_md" />
+
+        <ListView
+            android:id="@+id/bookmarkList"
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:layout_weight="1"
+            android:divider="@color/divider"
+            android:dividerHeight="1dp"
+            android:listSelector="@drawable/bg_list_item" />
+
+        <!-- Empty state -->
+        <TextView
+            android:id="@+id/emptyState"
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:layout_weight="1"
+            android:text="No bookmarks yet"
+            android:textColor="@color/text_hint"
+            android:textSize="@dimen/text_body"
+            android:gravity="center"
+            android:visibility="gone" />
+
+    </LinearLayout>
+
+</com.lazylines.leanback.SafeAreaFrameLayout>

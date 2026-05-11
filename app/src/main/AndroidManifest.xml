@@ -4,32 +4,42 @@
     <!-- 网络权限 -->
     <uses-permission android:name="android.permission.INTERNET" />
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
-    <!-- 悬浮窗权限 -->
-    <uses-permission android:name="android.permission.SYSTEM_ALERT_WINDOW" />
-    <!-- 保持屏幕常亮（视频播放） -->
+    <!-- 保持屏幕常亮 -->
     <uses-permission android:name="android.permission.WAKE_LOCK" />
+    <!-- 写入外部存储(下载) -->
+    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE"
+        android:maxSdkVersion="28" />
+
+    <!-- Leanback / TV features -->
+    <uses-feature android:name="android.software.leanback" android:required="false" />
+    <uses-feature android:name="android.hardware.type.tv" android:required="false" />
+    <!-- No touchscreen required -->
+    <uses-feature android:name="android.hardware.touchscreen" android:required="false" />
 
     <application
-        android:name=".CarBrowserApp"
+        android:name="com.lazylines.LazyLinesApp"
         android:allowBackup="true"
         android:icon="@mipmap/ic_launcher"
         android:label="@string/app_name"
         android:roundIcon="@mipmap/ic_launcher"
         android:supportsRtl="true"
-        android:theme="@style/CarBrowserTheme"
+        android:theme="@style/LazyLinesTheme"
         android:hardwareAccelerated="true"
         android:usesCleartextTraffic="true"
         android:largeHeap="true"
         android:networkSecurityConfig="@xml/network_security_config">
 
+        <!-- Home Activity (Leanback launcher) -->
         <activity
-            android:name=".MainActivity"
+            android:name="com.lazylines.ui.HomeActivity"
             android:exported="true"
             android:configChanges="orientation|screenSize|keyboardHidden"
             android:windowSoftInputMode="adjustResize"
-            android:launchMode="singleTask">
+            android:launchMode="singleTask"
+            android:keepScreenOn="true">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
+                <category android:name="android.intent.category.LEANBACK_LAUNCHER" />
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
             <intent-filter>
@@ -41,11 +51,34 @@
             </intent-filter>
         </activity>
 
-        <!-- 悬浮窗视频播放服务 -->
-        <service
-            android:name=".FloatingVideoService"
+        <!-- Browser Activity -->
+        <activity
+            android:name="com.lazylines.ui.BrowserActivity"
             android:exported="false"
-            android:foregroundServiceType="mediaPlayback" />
+            android:configChanges="orientation|screenSize|keyboardHidden"
+            android:windowSoftInputMode="adjustResize"
+            android:keepScreenOn="true"
+            android:launchMode="singleTask" />
+
+        <!-- Video Activity (fullscreen player) -->
+        <activity
+            android:name="com.lazylines.ui.VideoActivity"
+            android:exported="false"
+            android:configChanges="orientation|screenSize|keyboardHidden"
+            android:screenOrientation="landscape"
+            android:keepScreenOn="true" />
+
+        <!-- Settings Activity -->
+        <activity
+            android:name="com.lazylines.ui.SettingsActivity"
+            android:exported="false"
+            android:keepScreenOn="true" />
+
+        <!-- Bookmark Activity -->
+        <activity
+            android:name="com.lazylines.ui.BookmarkActivity"
+            android:exported="false"
+            android:keepScreenOn="true" />
 
     </application>
 

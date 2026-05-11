@@ -12,5 +12,5 @@ dependencyResolutionManagement {
         mavenCentral()
     }
 }
-rootProject.name = "CarBrowser"
+rootProject.name = "LazyLines"
 include("app")

@@ -1,0 +1,70 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- ═══════════════════════════════════════════════════════════════
+         LazyLines Projector Theme
+         ═══════════════════════════════════════════════════════════════ -->
+    <style name="LazyLinesTheme" parent="Theme.MaterialComponents.NoActionBar">
+        <item name="colorPrimary">@color/accent</item>
+        <item name="colorPrimaryDark">@color/bg_primary</item>
+        <item name="colorAccent">@color/accent</item>
+        <item name="android:windowBackground">@color/bg_primary</item>
+        <item name="android:statusBarColor">@color/bg_primary</item>
+        <item name="android:navigationBarColor">@color/bg_primary</item>
+        <item name="android:windowFullscreen">true</item>
+        <item name="android:windowContentOverlay">@null</item>
+    </style>
+
+    <!-- ═══════════════════════════════════════════════════════════════
+         Focus Indicator
+         ═══════════════════════════════════════════════════════════════ -->
+    <style name="FocusIndicator">
+        <item name="android:background">@drawable/focus_border</item>
+        <item name="android:foreground">@drawable/focus_border</item>
+    </style>
+
+    <!-- ═══════════════════════════════════════════════════════════════
+         TvCard – content cards on the home / speed-dial grid
+         ═══════════════════════════════════════════════════════════════ -->
+    <style name="TvCard">
+        <item name="android:background">@drawable/bg_card</item>
+        <item name="android:foreground">@drawable/focus_border</item>
+        <item name="android:clickable">true</item>
+        <item name="android:focusable">true</item>
+        <item name="android:focusableInTouchMode">true</item>
+        <item name="android:padding">@dimen/space_md</item>
+    </style>
+
+    <!-- ═══════════════════════════════════════════════════════════════
+         TvButton – remote-navigable action buttons
+         ═══════════════════════════════════════════════════════════════ -->
+    <style name="TvButton">
+        <item name="android:background">@drawable/bg_button</item>
+        <item name="android:clickable">true</item>
+        <item name="android:focusable">true</item>
+        <item name="android:focusableInTouchMode">true</item>
+        <item name="android:minWidth">@dimen/touch_target_min</item>
+        <item name="android:minHeight">@dimen/touch_target_min</item>
+        <item name="android:paddingStart">@dimen/space_lg</item>
+        <item name="android:paddingEnd">@dimen/space_lg</item>
+        <item name="android:paddingTop">@dimen/space_sm</item>
+        <item name="android:paddingBottom">@dimen/space_sm</item>
+        <item name="android:textAllCaps">false</item>
+        <item name="android:textColor">@color/text_primary</item>
+        <item name="android:textSize">@dimen/text_button</item>
+    </style>
+
+    <!-- ═══════════════════════════════════════════════════════════════
+         TvListItem – list / settings rows with left-accent focus bar
+         ═══════════════════════════════════════════════════════════════ -->
+    <style name="TvListItem">
+        <item name="android:background">@drawable/bg_list_item</item>
+        <item name="android:clickable">true</item>
+        <item name="android:focusable">true</item>
+        <item name="android:focusableInTouchMode">true</item>
+        <item name="android:minHeight">@dimen/touch_target_comfortable</item>
+        <item name="android:paddingStart">@dimen/space_md</item>
+        <item name="android:paddingEnd">@dimen/space_md</item>
+        <item name="android:paddingTop">@dimen/space_sm</item>
+        <item name="android:paddingBottom">@dimen/space_sm</item>
+    </style>
+</resources>

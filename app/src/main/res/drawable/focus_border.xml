@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="utf-8"?>
+<selector xmlns:android="http://schemas.android.com/apk/res/android">
+    <!-- Focused: 3dp solid cyan border + cyan glow shadow -->
+    <item android:state_focused="true">
+        <layer-list>
+            <!-- Outer glow -->
+            <item>
+                <shape android:shape="rectangle">
+                    <solid android:color="@color/focus_glow_solid" />
+                    <corners android:radius="@dimen/card_radius" />
+                    <padding
+                        android:left="@dimen/focus_glow_spread"
+                        android:top="@dimen/focus_glow_spread"
+                        android:right="@dimen/focus_glow_spread"
+                        android:bottom="@dimen/focus_glow_spread" />
+                </shape>
+            </item>
+            <!-- Inner border -->
+            <item>
+                <shape android:shape="rectangle">
+                    <solid android:color="@color/bg_primary" />
+                    <stroke
+                        android:width="@dimen/focus_border_width"
+                        android:color="@color/focus_border" />
+                    <corners android:radius="@dimen/card_radius" />
+                </shape>
+            </item>
+        </layer-list>
+    </item>
+
+    <!-- Default: transparent -->
+    <item>
+        <shape android:shape="rectangle">
+            <solid android:color="@android:color/transparent" />
+            <corners android:radius="@dimen/card_radius" />
+        </shape>
+    </item>
+</selector>

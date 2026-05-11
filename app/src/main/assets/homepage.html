@@ -2,15 +2,15 @@
 <html lang="zh-CN">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=1024, height=600, initial-scale=1.0, maximum-scale=1.0">
-<title>车机浏览器</title>
+<meta name="viewport" content="width=1920, height=1080, initial-scale=1.0, maximum-scale=1.0">
+<title>LazyLines 投影浏览器</title>
 <style>
 * { margin: 0; padding: 0; box-sizing: border-box; }
 body {
-    background: #0d1117;
-    color: #e6edf3;
+    background: #0D0D0D;
+    color: #FFFFFF;
     font-family: -apple-system, "PingFang SC", "Microsoft YaHei", sans-serif;
-    height: 600px;
+    height: 1080px;
     overflow: hidden;
     user-select: none;
     -webkit-user-select: none;
@@ -22,200 +22,402 @@ body {
     align-items: center;
     justify-content: center;
     height: 100%;
-    padding: 20px;
+    padding: 54px;
 }
 
-/* 时钟 */
-.clock {
-    font-size: 64px;
-    font-weight: 200;
-    color: #e6edf3;
-    letter-spacing: 4px;
-    margin-bottom: 4px;
-}
-.date {
-    font-size: 16px;
-    color: #8b949e;
-    margin-bottom: 30px;
-}
-
-/* 搜索框 */
-.search-box {
-    width: 600px;
-    height: 48px;
+/* ===== Clock ===== */
+.clock-row {
     display: flex;
     align-items: center;
-    background: #161b22;
-    border: 1px solid #30363d;
-    border-radius: 24px;
-    padding: 0 20px;
-    margin-bottom: 40px;
-    transition: border-color 0.2s;
+    gap: 24px;
+    margin-bottom: 4px;
+}
+.clock {
+    font-size: 48px;
+    font-weight: 200;
+    color: #FFFFFF;
+    letter-spacing: 4px;
+    outline: none;
+}
+.clock:focus {
+    outline: 3px solid #00E5FF;
+    outline-offset: 4px;
+    box-shadow: 0 0 16px #5A00E5FF;
+    border-radius: 4px;
+}
+.settings-btn {
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    background: #252540;
+    border: 1px solid #2A2A45;
+    color: #B0BEC5;
+    font-size: 20px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    outline: none;
+}
+.settings-btn:focus {
+    outline: 3px solid #00E5FF;
+    box-shadow: 0 0 16px #5A00E5FF;
+}
+.date {
+    font-size: 14px;
+    color: #607D8B;
+    margin-bottom: 32px;
+}
+
+/* ===== Search Box ===== */
+.search-box {
+    width: 780px;
+    height: 56px;
+    display: flex;
+    align-items: center;
+    background: #16213E;
+    border: 2px solid #2A2A45;
+    border-radius: 8px;
+    padding: 0 8px 0 20px;
+    margin-bottom: 48px;
+    transition: border-color 0.2s, box-shadow 0.2s;
 }
 .search-box:focus-within {
-    border-color: #4CAF50;
+    border-color: #00E5FF;
+    box-shadow: 0 0 20px #5A00E5FF;
 }
 .search-box input {
     flex: 1;
     background: none;
     border: none;
     outline: none;
-    color: #e6edf3;
-    font-size: 16px;
+    color: #FFFFFF;
+    font-size: 18px;
 }
 .search-box input::placeholder {
-    color: #484f58;
+    color: #607D8B;
 }
-.search-btn {
-    background: #4CAF50;
-    color: #fff;
+.go-btn {
+    background: #00E5FF;
+    color: #0D0D0D;
     border: none;
-    border-radius: 16px;
-    padding: 6px 16px;
-    font-size: 14px;
+    border-radius: 6px;
+    padding: 8px 24px;
+    font-size: 16px;
+    font-weight: 600;
     cursor: pointer;
+    outline: none;
+    white-space: nowrap;
+}
+.go-btn:focus {
+    outline: 3px solid #FFFFFF;
+    box-shadow: 0 0 16px #5A00E5FF;
 }
 
-/* 快捷导航 */
-.shortcuts {
+/* ===== Quick Links ===== */
+.quick-links {
     display: grid;
-    grid-template-columns: repeat(6, 1fr);
+    grid-template-columns: repeat(4, 1fr);
     gap: 20px;
-    max-width: 720px;
+    max-width: 780px;
+    margin-bottom: 40px;
 }
-.shortcut {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: 8px;
-    text-decoration: none;
-    cursor: pointer;
-}
-.shortcut-icon {
-    width: 56px;
-    height: 56px;
-    border-radius: 16px;
+.link-card {
+    width: 160px;
+    height: 80px;
+    border-radius: 12px;
     display: flex;
     align-items: center;
     justify-content: center;
-    font-size: 24px;
+    gap: 12px;
+    cursor: pointer;
+    text-decoration: none;
+    color: #FFFFFF;
+    font-size: 16px;
+    font-weight: 500;
+    transition: transform 0.15s, box-shadow 0.2s;
+    outline: none;
+    border: 2px solid transparent;
+}
+.link-card:focus {
+    outline: 3px solid #00E5FF;
+    box-shadow: 0 0 20px #5A00E5FF;
+    transform: scale(1.04);
+}
+.link-card:active {
+    transform: scale(0.96);
+}
+.link-icon {
+    width: 40px;
+    height: 40px;
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 20px;
     font-weight: bold;
-    color: #fff;
-    transition: transform 0.15s;
+    color: #FFFFFF;
+    flex-shrink: 0;
 }
-.shortcut-icon:active {
-    transform: scale(0.92);
+.link-name {
+    font-size: 15px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
 }
-.shortcut-name {
-    font-size: 12px;
-    color: #8b949e;
+.link-add {
+    border: 2px dashed #607D8B;
+    background: transparent;
+    color: #607D8B;
+    font-size: 28px;
+    justify-content: center;
+}
+
+/* ===== Recent Visits ===== */
+.recent-bar {
+    width: 780px;
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    outline: none;
+}
+.recent-bar:focus {
+    outline: none;
+}
+.recent-label {
+    font-size: 13px;
+    color: #607D8B;
+    flex-shrink: 0;
+}
+.recent-items {
+    display: flex;
+    gap: 12px;
+    overflow: hidden;
+    flex: 1;
+}
+.recent-item {
+    background: #1A1A2E;
+    border: 1px solid #2A2A45;
+    border-radius: 8px;
+    padding: 6px 14px;
+    font-size: 13px;
+    color: #B0BEC5;
+    cursor: pointer;
+    white-space: nowrap;
+    outline: none;
+    max-width: 180px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+.recent-item:focus {
+    outline: 3px solid #00E5FF;
+    box-shadow: 0 0 12px #5A00E5FF;
+    border-color: #00E5FF;
 }
 </style>
 </head>
 <body>
 <div class="container">
-    <div class="clock" id="clock">00:00</div>
+    <!-- Clock row -->
+    <div class="clock-row">
+        <div class="clock" id="clock" tabindex="0">00:00</div>
+        <button class="settings-btn" id="settingsBtn" tabindex="0">⚙</button>
+    </div>
     <div class="date" id="date"></div>
 
-    <div class="search-box">
-        <input type="text" id="searchInput" placeholder="搜索或输入网址" 
-               autocomplete="off" autofocus>
-        <button class="search-btn" onclick="doSearch()">搜索</button>
+    <!-- Search -->
+    <div class="search-box" id="searchBox">
+        <input type="text" id="searchInput" placeholder="搜索网页或输入网址"
+               autocomplete="off" tabindex="0">
+        <button class="go-btn" id="goBtn" tabindex="0">Go →</button>
     </div>
 
-    <div class="shortcuts">
-        <a class="shortcut" href="https://www.bilibili.com">
-            <div class="shortcut-icon" style="background:#00A1D6">B</div>
-            <span class="shortcut-name">哔哩哔哩</span>
-        </a>
-        <a class="shortcut" href="https://v.qq.com">
-            <div class="shortcut-icon" style="background:#FF6A00">腾</div>
-            <span class="shortcut-name">腾讯视频</span>
-        </a>
-        <a class="shortcut" href="https://www.iqiyi.com">
-            <div class="shortcut-icon" style="background:#00BE06">奇</div>
-            <span class="shortcut-name">爱奇艺</span>
-        </a>
-        <a class="shortcut" href="https://www.youku.com">
-            <div class="shortcut-icon" style="background:#1A91FF">优</div>
-            <span class="shortcut-name">优酷</span>
-        </a>
-        <a class="shortcut" href="https://www.youtube.com">
-            <div class="shortcut-icon" style="background:#FF0000">▶</div>
-            <span class="shortcut-name">YouTube</span>
-        </a>
-        <a class="shortcut" href="https://music.163.com">
-            <div class="shortcut-icon" style="background:#C20C0C">云</div>
-            <span class="shortcut-name">网易云音乐</span>
-        </a>
-        <a class="shortcut" href="https://www.zhihu.com">
-            <div class="shortcut-icon" style="background:#0066FF">知</div>
-            <span class="shortcut-name">知乎</span>
-        </a>
-        <a class="shortcut" href="https://www.bing.com">
-            <div class="shortcut-icon" style="background:#0078D4">B</div>
-            <span class="shortcut-name">必应</span>
-        </a>
-        <a class="shortcut" href="https://www.baidu.com">
-            <div class="shortcut-icon" style="background:#2932E1">百</div>
-            <span class="shortcut-name">百度</span>
-        </a>
-        <a class="shortcut" href="https://www.taobao.com">
-            <div class="shortcut-icon" style="background:#FF4400">淘</div>
-            <span class="shortcut-name">淘宝</span>
-        </a>
-        <a class="shortcut" href="https://map.baidu.com">
-            <div class="shortcut-icon" style="background:#2196F3">🗺</div>
-            <span class="shortcut-name">百度地图</span>
-        </a>
-        <a class="shortcut" href="https://www.douyin.com">
-            <div class="shortcut-icon" style="background:#161823">抖</div>
-            <span class="shortcut-name">抖音</span>
-        </a>
+    <!-- Quick Links Row 1 -->
+    <div class="quick-links" id="row1">
+        <div class="link-card" style="background:#00A1D6" tabindex="0"
+             data-url="https://www.bilibili.com" onclick="openUrl(this.dataset.url)">
+            <div class="link-icon" style="background:rgba(0,0,0,0.25)">B</div>
+            <span class="link-name">哔哩哔哩</span>
+        </div>
+        <div class="link-card" style="background:#FF0000" tabindex="0"
+             data-url="https://www.youtube.com" onclick="openUrl(this.dataset.url)">
+            <div class="link-icon" style="background:rgba(0,0,0,0.25)">▶</div>
+            <span class="link-name">YouTube</span>
+        </div>
+        <div class="link-card" style="background:#0066FF" tabindex="0"
+             data-url="https://www.zhihu.com" onclick="openUrl(this.dataset.url)">
+            <div class="link-icon" style="background:rgba(0,0,0,0.25)">知</div>
+            <span class="link-name">知乎</span>
+        </div>
+        <div class="link-card" style="background:#0078D4" tabindex="0"
+             data-url="https://www.bing.com" onclick="openUrl(this.dataset.url)">
+            <div class="link-icon" style="background:rgba(0,0,0,0.25)">B</div>
+            <span class="link-name">必应</span>
+        </div>
+    </div>
+
+    <!-- Quick Links Row 2 -->
+    <div class="quick-links" id="row2">
+        <div class="link-card" style="background:#2932E1" tabindex="0"
+             data-url="https://www.baidu.com" onclick="openUrl(this.dataset.url)">
+            <div class="link-icon" style="background:rgba(0,0,0,0.25)">百</div>
+            <span class="link-name">百度</span>
+        </div>
+        <div class="link-card" style="background:#FF4400" tabindex="0"
+             data-url="https://www.taobao.com" onclick="openUrl(this.dataset.url)">
+            <div class="link-icon" style="background:rgba(0,0,0,0.25)">淘</div>
+            <span class="link-name">淘宝</span>
+        </div>
+        <div class="link-card" style="background:#00A1D6" tabindex="0"
+             data-url="https://www.bilibili.com" onclick="openUrl(this.dataset.url)">
+            <div class="link-icon" style="background:rgba(0,0,0,0.25)">B</div>
+            <span class="link-name">哔哩哔哩</span>
+        </div>
+        <div class="link-card link-add" tabindex="0" onclick="addQuickLink()">
+            ＋ 添加
+        </div>
+    </div>
+
+    <!-- Recent Visits -->
+    <div class="recent-bar" id="recentBar">
+        <span class="recent-label">最近访问</span>
+        <div class="recent-items" id="recentItems">
+            <!-- Populated by JS -->
+        </div>
     </div>
 </div>
 
 <script>
-// 时钟
+// ===== Clock (update every 10s) =====
 function updateClock() {
     const now = new Date();
     const h = String(now.getHours()).padStart(2, '0');
     const m = String(now.getMinutes()).padStart(2, '0');
     document.getElementById('clock').textContent = h + ':' + m;
-    
+
     const days = ['日','一','二','三','四','五','六'];
-    const dateStr = now.getFullYear() + '年' + 
-                    (now.getMonth()+1) + '月' + 
+    const dateStr = now.getFullYear() + '年' +
+                    (now.getMonth()+1) + '月' +
                     now.getDate() + '日 星期' + days[now.getDay()];
     document.getElementById('date').textContent = dateStr;
 }
 updateClock();
 setInterval(updateClock, 10000);
 
-// 搜索
+// ===== Search =====
 function doSearch() {
     const q = document.getElementById('searchInput').value.trim();
     if (!q) return;
-    
-    if (q.match(/^https?:\/\//) || q.match(/^[\w-]+\.\w+/)) {
-        let url = q;
-        if (!q.startsWith('http')) url = 'https://' + q;
-        window.location.href = url;
-    } else {
-        window.location.href = 'https://www.bing.com/search?q=' + encodeURIComponent(q);
+    if (window.ProjectorBridge) {
+        window.ProjectorBridge.openUrl(q);
     }
 }
 
 document.getElementById('searchInput').addEventListener('keydown', function(e) {
     if (e.key === 'Enter') doSearch();
 });
+document.getElementById('goBtn').addEventListener('click', doSearch);
 
-// 快捷方式 - 在 WebView 内跳转
-document.querySelectorAll('.shortcut').forEach(function(el) {
-    el.addEventListener('click', function(e) {
-        e.preventDefault();
-        window.location.href = this.href;
+// ===== Quick Link Navigation =====
+function openUrl(url) {
+    if (window.ProjectorBridge) {
+        window.ProjectorBridge.openUrl(url);
+    }
+}
+
+function addQuickLink() {
+    // Future: open dialog to add custom quick link
+    var name = prompt('输入网站名称');
+    var url = prompt('输入网址');
+    if (name && url) {
+        if (window.ProjectorBridge) {
+            var links = JSON.parse(window.ProjectorBridge.getQuickLinks() || '[]');
+            links.push({name: name, url: url, color: '#607D8B'});
+            window.ProjectorBridge.saveQuickLinks(JSON.stringify(links));
+        }
+    }
+}
+
+// ===== Recent Visits =====
+function loadRecentVisits() {
+    // Placeholder — populated from bridge or local storage
+    var recentEl = document.getElementById('recentItems');
+    var items = ['bilibili.com', 'zhihu.com', 'youtube.com', 'bing.com'];
+    recentEl.innerHTML = '';
+    items.forEach(function(item) {
+        var el = document.createElement('div');
+        el.className = 'recent-item';
+        el.textContent = item;
+        el.tabIndex = 0;
+        el.setAttribute('data-url', 'https://' + item);
+        el.addEventListener('click', function() {
+            openUrl(this.dataset.url);
+        });
+        recentEl.appendChild(el);
     });
+}
+loadRecentVisits();
+
+// ===== D-pad Focus Navigation =====
+var focusChain = [
+    document.getElementById('clock'),
+    document.getElementById('settingsBtn'),
+    document.getElementById('searchInput'),
+    document.getElementById('goBtn')
+];
+
+// Add all link-cards to focus chain
+document.querySelectorAll('.link-card').forEach(function(card) {
+    focusChain.push(card);
+});
+// Add recent items
+document.querySelectorAll('.recent-item').forEach(function(item) {
+    focusChain.push(item);
+});
+
+var currentFocusIndex = 0;
+
+// Set initial focus
+if (focusChain.length > 0) {
+    focusChain[0].focus();
+}
+
+document.addEventListener('keydown', function(e) {
+    var focused = document.activeElement;
+    var idx = focusChain.indexOf(focused);
+
+    // Arrow keys for D-pad navigation
+    if (e.key === 'ArrowDown' || e.key === 'ArrowRight') {
+        e.preventDefault();
+        var next = (idx + 1) % focusChain.length;
+        focusChain[next].focus();
+    } else if (e.key === 'ArrowUp' || e.key === 'ArrowLeft') {
+        e.preventDefault();
+        var prev = (idx - 1 + focusChain.length) % focusChain.length;
+        focusChain[prev].focus();
+    } else if (e.key === 'Enter') {
+        // Default action for focused element
+        if (focused && focused.tagName === 'DIV' && focused.dataset.url) {
+            openUrl(focused.dataset.url);
+        }
+    }
+});
+
+// ===== Load Bridge Data =====
+window.addEventListener('load', function() {
+    if (window.ProjectorBridge) {
+        // Load quick links
+        try {
+            var links = JSON.parse(window.ProjectorBridge.getQuickLinks() || '[]');
+            // Could dynamically update UI here
+        } catch(e) {}
+
+        // Load search engine
+        try {
+            var engine = window.ProjectorBridge.getSearchEngine();
+            // Use engine for search
+        } catch(e) {}
+    }
 });
 </script>
 </body>

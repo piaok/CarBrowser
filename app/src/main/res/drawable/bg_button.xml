@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="utf-8"?>
+<selector xmlns:android="http://schemas.android.com/apk/res/android">
+    <!-- Focused: elevated background with cyan border -->
+    <item android:state_focused="true">
+        <layer-list>
+            <!-- Cyan border ring -->
+            <item>
+                <shape android:shape="rectangle">
+                    <solid android:color="@color/focus_border" />
+                    <corners android:radius="@dimen/card_radius" />
+                </shape>
+            </item>
+            <!-- Inner fill with 3dp inset to reveal border -->
+            <item
+                android:left="@dimen/focus_border_width"
+                android:top="@dimen/focus_border_width"
+                android:right="@dimen/focus_border_width"
+                android:bottom="@dimen/focus_border_width">
+                <shape android:shape="rectangle">
+                    <solid android:color="@color/bg_elevated" />
+                    <corners android:radius="5dp" />
+                </shape>
+            </item>
+        </layer-list>
+    </item>
+
+    <!-- Default: transparent -->
+    <item>
+        <shape android:shape="rectangle">
+            <solid android:color="@android:color/transparent" />
+            <corners android:radius="@dimen/card_radius" />
+        </shape>
+    </item>
+</selector>

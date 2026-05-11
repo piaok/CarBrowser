@@ -1,0 +1,196 @@
+<?xml version="1.0" encoding="utf-8"?>
+<com.lazylines.leanback.SafeAreaFrameLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="#0D0D0D">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:orientation="horizontal">
+
+        <!-- Left sidebar: 72dp wide -->
+        <LinearLayout
+            android:id="@+id/sidebar"
+            android:layout_width="@dimen/nav_bar_width"
+            android:layout_height="match_parent"
+            android:orientation="vertical"
+            android:background="#1A1A2E"
+            android:gravity="center_horizontal"
+            android:paddingTop="16dp"
+            android:paddingBottom="16dp">
+
+            <ImageButton
+                android:id="@+id/btn_home"
+                android:layout_width="40dp"
+                android:layout_height="40dp"
+                android:src="@drawable/ic_home"
+                android:background="@drawable/bg_button"
+                android:contentDescription="主页"
+                android:scaleType="centerInside"
+                android:focusable="true"
+                android:focusableInTouchMode="true"
+                android:nextFocusRight="@+id/url_bar"
+                android:nextFocusDown="@+id/btn_back" />
+
+            <ImageButton
+                android:id="@+id/btn_back"
+                android:layout_width="40dp"
+                android:layout_height="40dp"
+                android:layout_marginTop="8dp"
+                android:src="@drawable/ic_back"
+                android:background="@drawable/bg_button"
+                android:contentDescription="后退"
+                android:scaleType="centerInside"
+                android:focusable="true"
+                android:focusableInTouchMode="true"
+                android:nextFocusUp="@+id/btn_home"
+                android:nextFocusRight="@+id/url_bar"
+                android:nextFocusDown="@+id/btn_forward" />
+
+            <ImageButton
+                android:id="@+id/btn_forward"
+                android:layout_width="40dp"
+                android:layout_height="40dp"
+                android:layout_marginTop="8dp"
+                android:src="@drawable/ic_forward"
+                android:background="@drawable/bg_button"
+                android:contentDescription="前进"
+                android:scaleType="centerInside"
+                android:focusable="true"
+                android:focusableInTouchMode="true"
+                android:nextFocusUp="@+id/btn_back"
+                android:nextFocusRight="@+id/url_bar"
+                android:nextFocusDown="@+id/btn_refresh" />
+
+            <ImageButton
+                android:id="@+id/btn_refresh"
+                android:layout_width="40dp"
+                android:layout_height="40dp"
+                android:layout_marginTop="8dp"
+                android:src="@drawable/ic_rotate"
+                android:background="@drawable/bg_button"
+                android:contentDescription="刷新"
+                android:scaleType="centerInside"
+                android:focusable="true"
+                android:focusableInTouchMode="true"
+                android:nextFocusUp="@+id/btn_forward"
+                android:nextFocusRight="@+id/url_bar"
+                android:nextFocusDown="@+id/btn_download" />
+
+            <ImageButton
+                android:id="@+id/btn_download"
+                android:layout_width="40dp"
+                android:layout_height="40dp"
+                android:layout_marginTop="8dp"
+                android:src="@drawable/ic_video"
+                android:background="@drawable/bg_button"
+                android:contentDescription="下载"
+                android:scaleType="centerInside"
+                android:focusable="true"
+                android:focusableInTouchMode="true"
+                android:nextFocusUp="@+id/btn_refresh"
+                android:nextFocusRight="@+id/url_bar" />
+
+        </LinearLayout>
+
+        <!-- Main content area -->
+        <LinearLayout
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_weight="1"
+            android:orientation="vertical">
+
+            <!-- URL bar -->
+            <LinearLayout
+                android:id="@+id/url_bar_row"
+                android:layout_width="match_parent"
+                android:layout_height="@dimen/url_bar_height"
+                android:orientation="horizontal"
+                android:background="#16213E"
+                android:gravity="center_vertical"
+                android:paddingStart="12dp"
+                android:paddingEnd="8dp">
+
+                <EditText
+                    android:id="@+id/url_bar"
+                    android:layout_width="0dp"
+                    android:layout_height="40dp"
+                    android:layout_weight="1"
+                    android:background="@drawable/url_bar_bg"
+                    android:hint="搜索网页或输入网址"
+                    android:textColorHint="#607D8B"
+                    android:textColor="#FFFFFF"
+                    android:textSize="16sp"
+                    android:singleLine="true"
+                    android:imeOptions="actionGo"
+                    android:inputType="textUri"
+                    android:paddingStart="12dp"
+                    android:paddingEnd="12dp"
+                    android:ellipsize="middle"
+                    android:focusable="true"
+                    android:focusableInTouchMode="true"
+                    android:nextFocusLeft="@+id/btn_home"
+                    android:nextFocusDown="@+id/tab_bar" />
+
+                <ImageButton
+                    android:id="@+id/btn_bookmark"
+                    android:layout_width="36dp"
+                    android:layout_height="36dp"
+                    android:layout_marginStart="4dp"
+                    android:src="@drawable/ic_play"
+                    android:background="@drawable/bg_button"
+                    android:contentDescription="书签"
+                    android:scaleType="centerInside"
+                    android:focusable="true"
+                    android:focusableInTouchMode="true" />
+
+                <ImageButton
+                    android:id="@+id/btn_more"
+                    android:layout_width="36dp"
+                    android:layout_height="36dp"
+                    android:layout_marginStart="4dp"
+                    android:src="@drawable/ic_close"
+                    android:background="@drawable/bg_button"
+                    android:contentDescription="更多"
+                    android:scaleType="centerInside"
+                    android:focusable="true"
+                    android:focusableInTouchMode="true" />
+            </LinearLayout>
+
+            <!-- Progress bar -->
+            <ProgressBar
+                android:id="@+id/progress_bar"
+                style="@android:style/Widget.ProgressBar.Horizontal"
+                android:layout_width="match_parent"
+                android:layout_height="3dp"
+                android:max="100"
+                android:progressDrawable="@drawable/progress_bar_bg"
+                android:visibility="gone" />
+
+            <!-- Tab bar -->
+            <HorizontalScrollView
+                android:id="@+id/tab_bar"
+                android:layout_width="match_parent"
+                android:layout_height="@dimen/tab_height"
+                android:background="#1A1A2E"
+                android:scrollbars="none">
+
+                <LinearLayout
+                    android:id="@+id/tab_container_bar"
+                    android:layout_width="wrap_content"
+                    android:layout_height="match_parent"
+                    android:orientation="horizontal" />
+            </HorizontalScrollView>
+
+            <!-- WebView container -->
+            <FrameLayout
+                android:id="@+id/webview_container"
+                android:layout_width="match_parent"
+                android:layout_height="0dp"
+                android:layout_weight="1" />
+
+        </LinearLayout>
+    </LinearLayout>
+</com.lazylines.leanback.SafeAreaFrameLayout>

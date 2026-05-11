@@ -1,14 +1,29 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <!-- 适配1024x600的主题 -->
-    <style name="CarBrowserTheme" parent="Theme.MaterialComponents.NoActionBar">
-        <item name="colorPrimary">#4CAF50</item>
-        <item name="colorPrimaryDark">#1A1A2E</item>
-        <item name="colorAccent">#4CAF50</item>
-        <item name="android:windowBackground">#1A1A2E</item>
-        <item name="android:statusBarColor">#16213E</item>
-        <item name="android:navigationBarColor">#16213E</item>
+    <!-- LazyLines Projector Theme — 纯黑底减少DLP光输出 -->
+    <style name="LazyLinesTheme" parent="Theme.MaterialComponents.NoActionBar">
+        <item name="colorPrimary">@color/accent</item>
+        <item name="colorPrimaryDark">@color/bg_primary</item>
+        <item name="colorAccent">@color/accent</item>
+        <item name="android:windowBackground">@color/bg_primary</item>
+        <item name="android:statusBarColor">@color/bg_primary</item>
+        <item name="android:navigationBarColor">@color/bg_primary</item>
         <item name="android:windowFullscreen">true</item>
         <item name="android:windowContentOverlay">@null</item>
+    </style>
+
+    <!-- Dialog theme for TV-style dialogs -->
+    <style name="TvDialog" parent="Theme.MaterialComponents.Dialog.Alert">
+        <item name="android:background">@color/bg_secondary</item>
+        <item name="android:textColorPrimary">@color/text_primary</item>
+        <item name="android:textColor">@color/text_primary</item>
+        <item name="buttonBarPositiveButtonStyle">@style/TvDialogButton</item>
+        <item name="buttonBarNegativeButtonStyle">@style/TvDialogButton</item>
+    </style>
+
+    <style name="TvDialogButton" parent="Widget.MaterialComponents.Button.TextButton">
+        <item name="android:textColor">@color/accent</item>
+        <item name="android:minWidth">@dimen/touch_target_min</item>
+        <item name="android:minHeight">@dimen/touch_target_min</item>
     </style>
 </resources>
