@@ -29,8 +29,9 @@ class LeanbackFocusManager {
     var focusIndicatorStyle: FocusIndicatorStyle = FocusIndicatorStyle.GLOW_BORDER
         private set
 
-    /** Reference to the currently focused view, if any. */
-    var currentFocus: View? = null
+    /** Reference to the currently focused view, if any. Uses explicit getter to avoid JVM clash. */
+    /** View that currently has focus. Property name avoids JVM clash with getCurrentFocus(). */
+    var currentFocusedView: View? = null
         private set
 
     /**
@@ -106,14 +107,14 @@ class LeanbackFocusManager {
     /**
      * Returns the currently focused view tracked by this manager.
      */
-    fun getCurrentFocus(): View? = currentFocus
+    fun getCurrentFocus(): View? = currentFocusedView
 
     /**
      * Notify the manager that focus changed. Call this from your
      * [View.OnFocusChangeListener] or Activity's onWindowFocusChanged.
      */
     fun notifyFocusChanged(newFocus: View?) {
-        currentFocus = newFocus
+        currentFocusedView = newFocus
     }
 
     companion object {
