@@ -158,6 +158,16 @@ public class TabManager {
         return null;
     }
 
+    /**
+     * Get a tab by index.
+     */
+    public WebViewContainer getTab(int index) {
+        if (index >= 0 && index < tabs.size()) {
+            return tabs.get(index);
+        }
+        return null;
+    }
+
     public int getActiveTabIndex() {
         return activeTabIndex;
     }

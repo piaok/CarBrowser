@@ -9,6 +9,7 @@ import android.os.Bundle;
 import android.view.KeyEvent;
 import android.view.View;
 import android.view.WindowManager;
+import android.webkit.WebView;
 import android.widget.EditText;
 import android.widget.FrameLayout;
 import android.widget.ImageButton;
@@ -240,6 +241,21 @@ public class BrowserActivity extends AppCompatActivity
                         }
                     }
                 });
+            }
+
+            @Override public boolean onCreateWindow(boolean isDialog, boolean isUserGesture, android.os.Message resultMsg) {
+                // target="_blank" link clicked — create a new tab
+                int index = tabManager.newTab(BrowserActivity.this, null);
+                if (index >= 0) {
+                    WebViewContainer newTab = tabManager.getTab(index);
+                    if (newTab != null) {
+                        WebView.WebViewTransport transport = (WebView.WebViewTransport) resultMsg.obj;
+                        transport.setWebView(newTab.getWebView());
+                        resultMsg.sendToTarget();
+                        return true;
+                    }
+                }
+                return false;
             }
         });
 

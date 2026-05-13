@@ -3,7 +3,7 @@ package com.carbrowser.core;
 import android.content.Context;
 import android.graphics.Bitmap;
 import android.os.Handler;
-import android.os.Looper;
+import android.os.Message;
 import android.view.KeyEvent;
 import android.webkit.CookieManager;
 import android.webkit.WebChromeClient;
@@ -36,6 +36,14 @@ public class WebViewContainer {
         void onProgressChanged(int progress);
         void onReceivedTitle(String title);
         void onDownloadRequested(String url, String contentDisposition, String mimeType);
+
+        /**
+         * Called when a link with target="_blank" is clicked.
+         * Implementation should create a new tab and set the transport WebView
+         * before sending resultMsg.
+         * @return true if a new tab was successfully created
+         */
+        boolean onCreateWindow(boolean isDialog, boolean isUserGesture, Message resultMsg);
     }
 
     public interface TabProvider {
@@ -67,6 +75,10 @@ public class WebViewContainer {
         settings.setMixedContentMode(WebSettings.MIXED_CONTENT_NEVER_ALLOW);
         settings.setTextZoom(100); // Fixed text zoom for car display
         settings.setMediaPlaybackRequiresUserGesture(false); // Auto-play allowed
+
+        // Allow target="_blank" links to open new windows (handled via onCreateWindow)
+        settings.setSupportMultipleWindows(true);
+        settings.setJavaScriptCanOpenWindowsAutomatically(true);
 
         // Custom User-Agent: append car marker so sites can adapt
         String ua = settings.getUserAgentString();
@@ -158,6 +170,11 @@ public class WebViewContainer {
                     currentTitle = title;
                     callback.onReceivedTitle(title);
                 }
+            }
+
+            @Override
+            public boolean onCreateWindow(WebView view, boolean isDialog, boolean isUserGesture, Message resultMsg) {
+                return callback.onCreateWindow(isDialog, isUserGesture, resultMsg);
             }
         });
     }
