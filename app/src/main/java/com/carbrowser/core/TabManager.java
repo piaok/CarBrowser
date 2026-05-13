@@ -1,5 +1,6 @@
 package com.carbrowser.core;
 
+import android.os.Message;
 import android.view.View;
 import android.widget.FrameLayout;
 
@@ -73,6 +74,12 @@ public class TabManager {
             @Override
             public void onDownloadRequested(String url, String contentDisposition, String mimeType) {
                 // Handled by BrowserActivity's own callback wrapper
+            }
+
+            @Override
+            public boolean onCreateWindow(boolean isDialog, boolean isUserGesture, Message resultMsg) {
+                // Handled by BrowserActivity's wrapping callback
+                return false;
             }
         });
         tabHolder[0] = tab;
